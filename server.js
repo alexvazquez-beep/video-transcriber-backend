@@ -4,12 +4,11 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { execFile } from "child_process";
+import { fileURLToPath } from "url";
 import OpenAI from "openai";
 
 const app = express();
 
-import path from "path";
-import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,4 +72,5 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
+
 
