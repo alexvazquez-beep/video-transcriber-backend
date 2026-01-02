@@ -9,7 +9,6 @@ import OpenAI from "openai";
 
 const app = express();
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -72,5 +71,6 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
+
 
 
