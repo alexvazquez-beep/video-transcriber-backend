@@ -17,6 +17,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/api/ping-openai", async (req, res) => {
+  try {
+    const r = await fetch("https://api.openai.com/v1/models", {
+      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` }
+    });
+    const text = await r.text();
+    res.status(r.status).send(text.slice(0, 300));
+  } catch (e) {
+    res.status(500).json({ error: "ping failed", details: String(e?.message || e) });
+  }
+});
+
+
 const upload = multer({
   dest: "/tmp/uploads",
   limits: { fileSize: 250 * 1024 * 1024 }
@@ -163,3 +176,4 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
