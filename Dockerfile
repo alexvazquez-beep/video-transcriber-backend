@@ -11,6 +11,9 @@ RUN npm install --omit=dev
 
 COPY server.js ./
 
+# ✅ ADD THIS LINE (copies your frontend)
+COPY public ./public
+
 ENV NODE_ENV=production
 EXPOSE 3000
 
