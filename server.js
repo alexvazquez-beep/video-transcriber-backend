@@ -26,23 +26,21 @@ const upload = multer({
   limits: { fileSize: 250 * 1024 * 1024 } // 250MB
 });
 
-/* Force IPv4 + stable keep-alive via undici */
+/* Force IPv4 + keep-alive */
 const dispatcher = new Agent({
-  connect: { family: 4 }, // ✅ IPv4 only
-  keepAliveTimeout: 10_000,
-  keepAliveMaxTimeout: 10_000
+  connect: { family: 4 },
+  keepAliveTimeout: 30_000,
+  keepAliveMaxTimeout: 30_000
 });
 
-const customFetch = (url, options = {}) => {
-  return undiciFetch(url, { ...options, dispatcher });
-};
+const customFetch = (url, options = {}) => undiciFetch(url, { ...options, dispatcher });
 
 /* OpenAI client */
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   fetch: customFetch,
-  maxRetries: 3,
-  timeout: 180000 // 180s
+  maxRetries: 2,
+  timeout: 180000
 });
 
 /* Helpers */
@@ -55,8 +53,11 @@ function run(cmd, args) {
   });
 }
 
-async function extractAudioToMp3(inputPath, outputPath) {
-  // Very small speech-focused mp3 to reduce upload time/risk
+/**
+ * Convert input (video or audio) -> WAV PCM (16kHz mono)
+ * This is the most compatible format for transcription.
+ */
+async function extractAudioToWav(inputPath, outputPath) {
   await run("ffmpeg", [
     "-y",
     "-i",
@@ -66,15 +67,25 @@ async function extractAudioToMp3(inputPath, outputPath) {
     "1",
     "-ar",
     "16000",
-    "-b:a",
-    "32k",
     "-c:a",
-    "mp3",
+    "pcm_s16le",
     outputPath
   ]);
 }
 
-async function withRetry(fn, tries = 3) {
+/* Optional: get duration for debugging */
+async function getDurationSeconds(mediaPath) {
+  const { stdout } = await run("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    mediaPath
+  ]);
+  const sec = Number(String(stdout).trim());
+  return Number.isFinite(sec) ? sec : null;
+}
+
+async function withRetry(fn, tries = 2) {
   let lastErr;
   for (let i = 0; i < tries; i++) {
     try {
@@ -90,20 +101,23 @@ async function withRetry(fn, tries = 3) {
         msg.includes("APIConnectionError");
 
       if (!retryable || i === tries - 1) throw e;
-      await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+      await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
     }
   }
   throw lastErr;
 }
 
-async function transcribeFile(audioPath) {
+async function transcribeFile(wavPath) {
   return await withRetry(async () => {
-    return await client.audio.transcriptions.create({
+    // Ensure the stream is fresh each attempt (important!)
+    const stream = fs.createReadStream(wavPath);
+    const text = await client.audio.transcriptions.create({
       model: "gpt-4o-mini-transcribe",
-      file: fs.createReadStream(audioPath),
+      file: stream,
       response_format: "text"
     });
-  }, 3);
+    return text;
+  }, 2);
 }
 
 /* Routes */
@@ -111,24 +125,14 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-/**
- * Diagnostic: checks if THIS server can reach OpenAI at all.
- * Open: https://your-domain/api/ping-openai
- */
+/* Connectivity test */
 app.get("/api/ping-openai", async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({
-        error: "Missing OPENAI_API_KEY",
-        details: "Set it in your host variables (Railway/Render)."
-      });
-    }
-
     const r = await customFetch("https://api.openai.com/v1/models", {
       headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` }
     });
     const text = await r.text();
-    res.status(r.status).send(text.slice(0, 500));
+    res.status(r.status).send(text.slice(0, 400));
   } catch (e) {
     res.status(500).json({ error: "ping failed", details: String(e?.message || e) });
   }
@@ -137,15 +141,15 @@ app.get("/api/ping-openai", async (req, res) => {
 app.post("/api/transcribe", upload.single("file"), async (req, res) => {
   const jobId = crypto.randomBytes(6).toString("hex");
   let uploadedPath;
-  let mp3Path;
+  let wavPath;
 
   try {
-    console.log(`[${jobId}] /api/transcribe start`);
+    console.log(`[${jobId}] transcribe start`);
 
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({
         error: "Server misconfigured.",
-        details: "Missing OPENAI_API_KEY in environment variables."
+        details: "Missing OPENAI_API_KEY in Railway variables."
       });
     }
 
@@ -154,14 +158,18 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
     }
 
     uploadedPath = req.file.path;
-    mp3Path = `${uploadedPath}_${jobId}.mp3`;
+    wavPath = `${uploadedPath}_${jobId}.wav`;
 
     console.log(`[${jobId}] uploaded size=${req.file.size} type=${req.file.mimetype}`);
-    console.log(`[${jobId}] extracting audio...`);
-    await extractAudioToMp3(uploadedPath, mp3Path);
+    console.log(`[${jobId}] ffmpeg -> wav...`);
+    await extractAudioToWav(uploadedPath, wavPath);
 
-    console.log(`[${jobId}] transcribing...`);
-    const text = await transcribeFile(mp3Path);
+    const dur = await getDurationSeconds(wavPath);
+    const wavSize = fs.statSync(wavPath).size;
+    console.log(`[${jobId}] wav duration=${dur}s size=${wavSize} bytes`);
+
+    console.log(`[${jobId}] sending to OpenAI...`);
+    const text = await transcribeFile(wavPath);
 
     console.log(`[${jobId}] done`);
     return res.json({ text });
@@ -172,12 +180,8 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
       details: String(e?.message || e)
     });
   } finally {
-    try {
-      if (uploadedPath && fs.existsSync(uploadedPath)) fs.unlinkSync(uploadedPath);
-    } catch {}
-    try {
-      if (mp3Path && fs.existsSync(mp3Path)) fs.unlinkSync(mp3Path);
-    } catch {}
+    try { if (uploadedPath && fs.existsSync(uploadedPath)) fs.unlinkSync(uploadedPath); } catch {}
+    try { if (wavPath && fs.existsSync(wavPath)) fs.unlinkSync(wavPath); } catch {}
     console.log(`[${jobId}] cleanup complete`);
   }
 });
