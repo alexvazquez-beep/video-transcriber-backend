@@ -8,6 +8,15 @@ import OpenAI from "openai";
 
 const app = express();
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+
 // IMPORTANT: later we can lock this down to only your LeadPages domain.
 app.use(cors());
 app.use(express.json());
@@ -27,7 +36,7 @@ function runFfmpegExtractAudio(inputPath, outputPath) {
 }
 
 app.get("/", (req, res) => {
-  res.send("OK - Video Transcriber Backend is running");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.post("/api/transcribe", upload.single("file"), async (req, res) => {
@@ -64,3 +73,4 @@ app.post("/api/transcribe", upload.single("file"), async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
+
