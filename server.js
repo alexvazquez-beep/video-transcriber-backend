@@ -6,56 +6,65 @@ import path from "path";
 import crypto from "crypto";
 import { execFile } from "child_process";
 import { fileURLToPath } from "url";
-
-import OpenAI from "openai";
 import { Agent, fetch as undiciFetch } from "undici";
-import { toFile } from "openai/uploads";
 
 const app = express();
-
-/* ES modules __dirname */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* Middleware */
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-/* Uploads */
+// ---------- Storage (simple MVP) ----------
+const UPLOAD_DIR = "/tmp/stored_uploads";
+fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+// Keep uploads for 2 hours
+const UPLOAD_TTL_MS = 2 * 60 * 60 * 1000;
+const uploads = new Map(); // uploadId -> { path, originalName, createdAt }
+
+// In-memory jobs
+const jobs = new Map(); // jobId -> {status, progress, resultText, error}
+
+// ---------- Multer (upload only) ----------
 const upload = multer({
-  dest: "/tmp/uploads",
+  dest: "/tmp/incoming",
   limits: { fileSize: 300 * 1024 * 1024 } // 300MB
 });
 
-/* Force IPv4 + keep-alive */
+// ---------- Force IPv4 + keepalive for all outbound OpenAI calls ----------
 const dispatcher = new Agent({
   connect: { family: 4 },
   keepAliveTimeout: 30_000,
   keepAliveMaxTimeout: 30_000
 });
-const customFetch = (url, options = {}) => undiciFetch(url, { ...options, dispatcher });
 
-/* OpenAI client */
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  fetch: customFetch,
-  maxRetries: 2,
-  timeout: 180000
-});
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
-/* In-memory job store */
-const jobs = new Map();
-/**
- * job = {
- *   id, status: "queued"|"processing"|"done"|"error",
- *   progress: { step, pct, message },
- *   resultText, error,
- *   createdAt
- * }
- */
+async function withRetry(fn, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      const msg = String(e?.message || e);
+      const retryable =
+        msg.includes("ECONNRESET") ||
+        msg.includes("ETIMEDOUT") ||
+        msg.includes("EAI_AGAIN") ||
+        msg.includes("socket hang up");
 
-/* Helpers */
+      if (!retryable || i === tries - 1) throw e;
+      await sleep(1200 * (i + 1));
+    }
+  }
+  throw lastErr;
+}
+
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
     execFile(cmd, args, (err, stdout, stderr) => {
@@ -65,8 +74,8 @@ function run(cmd, args) {
   });
 }
 
+// Convert video/audio → MP3 (small)
 async function extractAudioToMp3(inputPath, outputPath) {
-  // Light speech-focused MP3 to keep outbound payload smaller
   await run("ffmpeg", [
     "-y",
     "-i",
@@ -84,226 +93,178 @@ async function extractAudioToMp3(inputPath, outputPath) {
   ]);
 }
 
-async function getDurationSeconds(mediaPath) {
-  const { stdout } = await run("ffprobe", [
-    "-v", "error",
-    "-show_entries", "format=duration",
-    "-of", "default=noprint_wrappers=1:nokey=1",
-    mediaPath
-  ]);
-  const sec = Number(String(stdout).trim());
-  return Number.isFinite(sec) ? sec : null;
-}
+// ✅ DIRECT OpenAI call with undici + FormData (no SDK, no node-fetch)
+async function openaiTranscribeMp3(mp3Path) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
 
-async function splitAudioIntoChunks(mp3Path, outDir, segmentSeconds = 300) {
-  fs.mkdirSync(outDir, { recursive: true });
-  const outPattern = path.join(outDir, "chunk_%03d.mp3");
-
-  await run("ffmpeg", [
-    "-y",
-    "-i",
-    mp3Path,
-    "-f",
-    "segment",
-    "-segment_time",
-    String(segmentSeconds),
-    "-reset_timestamps",
-    "1",
-    "-c",
-    "copy",
-    outPattern
-  ]);
-
-  const files = fs
-    .readdirSync(outDir)
-    .filter((f) => f.startsWith("chunk_") && f.endsWith(".mp3"))
-    .sort();
-
-  if (!files.length) throw new Error("Chunking produced no output files.");
-  return files.map((f) => path.join(outDir, f));
-}
-
-async function withRetry(fn, tries = 3) {
-  let lastErr;
-  for (let i = 0; i < tries; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      lastErr = e;
-      const msg = String(e?.message || e);
-      const retryable =
-        msg.includes("ECONNRESET") ||
-        msg.includes("ETIMEDOUT") ||
-        msg.includes("EAI_AGAIN") ||
-        msg.includes("socket hang up") ||
-        msg.includes("APIConnectionError");
-      if (!retryable || i === tries - 1) throw e;
-      await new Promise((r) => setTimeout(r, 1200 * (i + 1)));
-    }
-  }
-  throw lastErr;
-}
-
-/**
- * IMPORTANT: Use `toFile(...)` so we send a proper multipart file body
- * and avoid flaky stream behavior in some hosts.
- */
-async function transcribeMp3File(mp3Path) {
   const buf = fs.readFileSync(mp3Path);
-  const file = await toFile(buf, path.basename(mp3Path), { type: "audio/mpeg" });
+
+  // Node 20 has global FormData/Blob
+  const form = new FormData();
+  form.append("model", "gpt-4o-mini-transcribe");
+  form.append("response_format", "text");
+  form.append("file", new Blob([buf], { type: "audio/mpeg" }), "audio.mp3");
 
   return await withRetry(async () => {
-    return await client.audio.transcriptions.create({
-      model: "gpt-4o-mini-transcribe",
-      file,
-      response_format: "text"
+    const r = await undiciFetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+        // NOTE: do NOT set Content-Type manually; FormData will handle boundary
+      },
+      body: form,
+      dispatcher
     });
+
+    const text = await r.text();
+
+    if (!r.ok) {
+      // Return server error text for debugging
+      throw new Error(`OpenAI ${r.status}: ${text.slice(0, 300)}`);
+    }
+
+    // response_format=text returns plain text
+    return text;
   }, 3);
 }
 
-function setJob(jobId, patch) {
-  const j = jobs.get(jobId);
-  if (!j) return;
-  jobs.set(jobId, { ...j, ...patch });
-}
+// Cleanup old uploads (best effort)
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, u] of uploads.entries()) {
+    if (now - u.createdAt > UPLOAD_TTL_MS) {
+      try { if (fs.existsSync(u.path)) fs.unlinkSync(u.path); } catch {}
+      uploads.delete(id);
+    }
+  }
+}, 10 * 60 * 1000).unref();
 
-function setProgress(jobId, pct, step, message) {
-  setJob(jobId, { progress: { pct, step, message } });
-}
-
-/* Routes */
+// ---------- Routes ----------
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-/* Diagnostic: proves server can reach OpenAI */
+// Ping OpenAI
 app.get("/api/ping-openai", async (req, res) => {
   try {
-    const r = await customFetch("https://api.openai.com/v1/models", {
-      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` }
+    const r = await undiciFetch("https://api.openai.com/v1/models", {
+      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      dispatcher
     });
-    const text = await r.text();
-    res.status(r.status).send(text.slice(0, 400));
+    const t = await r.text();
+    res.status(r.status).send(t.slice(0, 400));
   } catch (e) {
     res.status(500).json({ error: "ping failed", details: String(e?.message || e) });
   }
 });
 
-/**
- * Create job: upload file and return jobId immediately
- * POST /api/jobs  (multipart form field name "file")
- */
-app.post("/api/jobs", upload.single("file"), async (req, res) => {
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({
-      error: "Missing OPENAI_API_KEY in host variables."
+// 1) Upload only (stores file, returns uploadId)
+app.post("/api/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded (field name: file)" });
+
+    const uploadId = crypto.randomBytes(10).toString("hex");
+    const storedPath = path.join(UPLOAD_DIR, `${uploadId}_${req.file.originalname}`);
+
+    // Move from incoming → stored
+    fs.renameSync(req.file.path, storedPath);
+
+    uploads.set(uploadId, {
+      path: storedPath,
+      originalName: req.file.originalname,
+      createdAt: Date.now()
     });
+
+    return res.json({ uploadId, originalName: req.file.originalname });
+  } catch (e) {
+    return res.status(500).json({ error: "Upload failed", details: String(e?.message || e) });
   }
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded. Field must be 'file'." });
-  }
-
-  const jobId = crypto.randomBytes(8).toString("hex");
-
-  jobs.set(jobId, {
-    id: jobId,
-    status: "queued",
-    progress: { pct: 0, step: "queued", message: "Queued" },
-    resultText: "",
-    error: "",
-    createdAt: Date.now()
-  });
-
-  // Start background processing (do NOT await)
-  processJob(jobId, req.file.path, req.file.originalname).catch((e) => {
-    console.error(`[${jobId}] job crash:`, e);
-    setJob(jobId, {
-      status: "error",
-      error: String(e?.message || e)
-    });
-  });
-
-  return res.json({ jobId });
 });
 
-/**
- * Poll job status:
- * GET /api/jobs/:id
- */
+// 2) Start transcription job (returns jobId immediately)
+app.post("/api/jobs", async (req, res) => {
+  try {
+    const { uploadId } = req.body || {};
+    if (!uploadId) return res.status(400).json({ error: "Missing uploadId" });
+
+    const u = uploads.get(uploadId);
+    if (!u) return res.status(404).json({ error: "Upload not found or expired" });
+
+    const jobId = crypto.randomBytes(10).toString("hex");
+    jobs.set(jobId, {
+      id: jobId,
+      status: "queued",
+      progress: { pct: 0, message: "Queued" },
+      resultText: "",
+      error: ""
+    });
+
+    // Background work
+    processJob(jobId, u.path).catch((e) => {
+      jobs.set(jobId, {
+        ...jobs.get(jobId),
+        status: "error",
+        error: String(e?.message || e),
+        progress: { pct: 0, message: "Error" }
+      });
+    });
+
+    return res.json({ jobId });
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to start job", details: String(e?.message || e) });
+  }
+});
+
+// 3) Poll job
 app.get("/api/jobs/:id", (req, res) => {
-  const job = jobs.get(req.params.id);
-  if (!job) return res.status(404).json({ error: "Job not found" });
-  return res.json(job);
+  const j = jobs.get(req.params.id);
+  if (!j) return res.status(404).json({ error: "Job not found" });
+  return res.json(j);
 });
 
-/* Background job worker */
-async function processJob(jobId, uploadedPath, originalName) {
+// Background worker
+async function processJob(jobId, storedVideoPath) {
+  const setProgress = (pct, message) => {
+    const j = jobs.get(jobId);
+    if (!j) return;
+    jobs.set(jobId, { ...j, progress: { pct, message } });
+  };
+
+  const setStatus = (status) => {
+    const j = jobs.get(jobId);
+    if (!j) return;
+    jobs.set(jobId, { ...j, status });
+  };
+
   let mp3Path = null;
-  let chunksDir = null;
 
   try {
-    setJob(jobId, { status: "processing" });
+    setStatus("processing");
+    setProgress(10, "Extracting audio…");
 
-    setProgress(jobId, 10, "extract", "Extracting audio from your video…");
-    mp3Path = `${uploadedPath}_${jobId}.mp3`;
-    await extractAudioToMp3(uploadedPath, mp3Path);
+    mp3Path = `/tmp/${jobId}.mp3`;
+    await extractAudioToMp3(storedVideoPath, mp3Path);
 
-    const dur = await getDurationSeconds(mp3Path);
-    const size = fs.statSync(mp3Path).size;
+    setProgress(55, "Uploading audio to OpenAI…");
+    const text = await openaiTranscribeMp3(mp3Path);
 
-    // If short (<= 10 min), do single file
-    if (!dur || dur <= 600) {
-      setProgress(jobId, 55, "upload", `Uploading audio to OpenAI… (${Math.round(dur || 0)}s)`);
-      const text = await transcribeMp3File(mp3Path);
-
-      setProgress(jobId, 100, "done", "Done");
-      setJob(jobId, { status: "done", resultText: text });
-      return;
-    }
-
-    // If longer, chunk into 5-min segments
-    setProgress(jobId, 35, "chunk", "Splitting long audio into chunks…");
-    chunksDir = path.join("/tmp", `chunks_${jobId}`);
-    const chunkFiles = await splitAudioIntoChunks(mp3Path, chunksDir, 300);
-
-    const MAX_CHUNKS = 24; // 2 hours cap
-    const used = chunkFiles.slice(0, MAX_CHUNKS);
-
-    let full = "";
-    for (let i = 0; i < used.length; i++) {
-      const pct = 55 + Math.round((40 * (i / used.length)));
-      setProgress(jobId, pct, "transcribe", `Transcribing chunk ${i + 1} of ${used.length}…`);
-      const part = await transcribeMp3File(used[i]);
-      full += (i === 0 ? "" : "\n\n") + part;
-    }
-
-    if (chunkFiles.length > MAX_CHUNKS) {
-      full += `\n\n[Note: truncated after ${MAX_CHUNKS * 5} minutes due to server limits.]`;
-    }
-
-    setProgress(jobId, 100, "done", "Done");
-    setJob(jobId, { status: "done", resultText: full });
+    setProgress(100, "Done");
+    const j = jobs.get(jobId);
+    jobs.set(jobId, { ...j, status: "done", resultText: text });
   } catch (e) {
-    console.error(`[${jobId}] ERROR:`, e);
-    setJob(jobId, {
+    const j = jobs.get(jobId);
+    jobs.set(jobId, {
+      ...j,
       status: "error",
-      error: String(e?.message || e)
+      error: String(e?.message || e),
+      progress: { pct: 0, message: "Error" }
     });
   } finally {
-    // Cleanup
-    try { if (uploadedPath && fs.existsSync(uploadedPath)) fs.unlinkSync(uploadedPath); } catch {}
     try { if (mp3Path && fs.existsSync(mp3Path)) fs.unlinkSync(mp3Path); } catch {}
-    try {
-      if (chunksDir && fs.existsSync(chunksDir)) {
-        for (const f of fs.readdirSync(chunksDir)) {
-          try { fs.unlinkSync(path.join(chunksDir, f)); } catch {}
-        }
-        try { fs.rmdirSync(chunksDir); } catch {}
-      }
-    } catch {}
   }
 }
 
-/* Start */
+// Start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
