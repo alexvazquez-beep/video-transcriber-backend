@@ -5,365 +5,151 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Video Transcriber</title>
   <style>
-    :root{
-      --bg:#ffffff;
-      --text:#0f172a;
-      --muted:#475569;
-      --card:#ffffff;
-      --border:#e2e8f0;
-      --shadow: 0 10px 30px rgba(2,6,23,.08);
-      /* Accent pulled from your logo vibe (adjust if you want) */
-      --accent:#2563eb;
-      --accent2:#0ea5e9;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.45;
-    }
-    header{
-      border-bottom:1px solid var(--border);
-      background: linear-gradient(90deg, rgba(37,99,235,.08), rgba(14,165,233,.08));
-    }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 20px;
-    }
-    .brand{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .brand img{
-      width:40px;
-      height:40px;
-      object-fit:contain;
-      display:block;
-    }
-    .brand-title{
-      display:flex;
-      flex-direction:column;
-    }
-    .brand-title b{
-      font-size:15px;
-      letter-spacing:.2px;
-    }
-    .brand-title span{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    main .wrap{
-      padding-top:26px;
-      padding-bottom:40px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:16px;
-    }
-    @media (min-width:900px){
-      .grid{grid-template-columns: 420px 1fr;}
-    }
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:14px;
-      box-shadow: var(--shadow);
-      padding:18px;
-    }
-    .card h2{
-      margin:0 0 10px 0;
-      font-size:16px;
-    }
-    .help{
-      color:var(--muted);
-      font-size:13px;
-      margin: 0 0 14px 0;
-    }
-    .file{
-      border:1px dashed #cbd5e1;
-      border-radius:12px;
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    input[type="file"]{
-      width:100%;
-      font-size:13px;
-    }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      width:100%;
-      border:0;
-      border-radius:12px;
-      padding:12px 14px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:14px;
-      color:white;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      box-shadow: 0 10px 18px rgba(37,99,235,.18);
-      transition: transform .05s ease-in-out, opacity .2s ease;
-    }
-    .btn:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
-    .btn:active{ transform: translateY(1px); }
-
-    .status{
-      margin-top:12px;
-      font-size:13px;
-      color:var(--muted);
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .bar{
-      flex:1;
-      height:8px;
-      border-radius:999px;
-      background:#e2e8f0;
-      overflow:hidden;
-      border:1px solid #e2e8f0;
-    }
-    .bar > div{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width .25s ease;
-    }
-
-    textarea{
-      width:100%;
-      min-height: 380px;
-      resize: vertical;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px;
-      font-size:13px;
-      line-height:1.5;
-      outline:none;
-      box-shadow: inset 0 1px 0 rgba(2,6,23,.02);
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-      flex-wrap:wrap;
-    }
-    .mini{
-      border:1px solid var(--border);
-      background:white;
-      border-radius:12px;
-      padding:10px 12px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:13px;
-      color:var(--text);
-    }
-    .mini:hover{
-      border-color:#cbd5e1;
-    }
-    .foot{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:14px;
-    }
-    .err{
-      color:#b91c1c;
-      font-weight:700;
-    }
+    body { font-family: system-ui, Arial; margin: 0; background: #fff; color: #0f172a; }
+    header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media(min-width: 900px){ .row { grid-template-columns: 420px 1fr; } }
+    .card { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; box-shadow: 0 10px 30px rgba(2,6,23,.06); }
+    button { padding: 12px 14px; border-radius: 12px; border: 0; font-weight: 700; cursor: pointer; width: 100%; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .primary { background: linear-gradient(90deg, #2563eb, #0ea5e9); color: #fff; }
+    .secondary { background: #0f172a; color: #fff; }
+    input { width: 100%; }
+    textarea { width: 100%; min-height: 380px; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; }
+    .status { margin-top: 10px; font-size: 13px; color: #475569; }
+    .err { color: #b91c1c; font-weight: 700; }
+    .small { font-size: 12px; color: #64748b; margin-top: 8px; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="brand">
-        <!-- IMPORTANT: logo must be inside /public and referenced like this -->
-        <img src="logo.png" alt="Logo" />
-        <div class="brand-title">
-          <b>Video Transcriber</b>
-          <span>Upload a video and get a transcript (job + polling)</span>
-        </div>
+<header>
+  <b>Video Transcriber</b>
+  <div class="small">Upload first, then transcribe (job + polling)</div>
+</header>
+
+<div class="wrap">
+  <div class="row">
+    <div class="card">
+      <h3>1) Upload</h3>
+      <input id="file" type="file" accept="video/*,audio/*" />
+      <div style="height:10px"></div>
+      <button id="uploadBtn" class="primary">Upload</button>
+      <div class="status" id="uploadStatus">Idle.</div>
+
+      <div style="height:16px"></div>
+
+      <h3>2) Transcribe</h3>
+      <button id="transcribeBtn" class="secondary" disabled>Transcribe</button>
+      <div class="status" id="jobStatus">Waiting for upload…</div>
+
+      <div class="small">
+        Tip: If your host drops long requests, this pattern is the fix.
       </div>
     </div>
-  </header>
 
-  <main>
-    <div class="wrap">
-      <div class="grid">
-        <section class="card">
-          <h2>Upload</h2>
-          <p class="help">Supported: MP4, MOV, MP3, WAV. For best results, use clear speech and minimal background noise.</p>
-
-          <div class="file">
-            <input id="file" type="file" accept="video/*,audio/*" />
-            <button id="go" class="btn">Transcribe</button>
-
-            <div class="status">
-              <span id="statusText">Idle.</span>
-              <div class="bar" aria-label="progress">
-                <div id="barFill"></div>
-              </div>
-              <span id="pct" style="min-width:44px; text-align:right;">0%</span>
-            </div>
-
-            <div class="foot">
-              Tip: If you upload a long video, it may take a few minutes. Don’t refresh while it’s processing.
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <h2>Transcript</h2>
-          <textarea id="out" placeholder="Your transcript will appear here…"></textarea>
-
-          <div class="actions">
-            <button id="copy" class="mini">Copy</button>
-            <button id="download" class="mini">Download .txt</button>
-            <button id="clear" class="mini">Clear</button>
-          </div>
-
-          <div class="foot">
-            If you still see connection errors, try again—jobs + retries reduce failures significantly.
-          </div>
-        </section>
-      </div>
+    <div class="card">
+      <h3>Transcript</h3>
+      <textarea id="out" placeholder="Transcript will appear here…"></textarea>
     </div>
-  </main>
+  </div>
+</div>
 
-  <script>
-    const fileInput = document.getElementById("file");
-    const go = document.getElementById("go");
-    const out = document.getElementById("out");
-    const statusText = document.getElementById("statusText");
-    const barFill = document.getElementById("barFill");
-    const pct = document.getElementById("pct");
+<script>
+  const fileInput = document.getElementById("file");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const transcribeBtn = document.getElementById("transcribeBtn");
+  const uploadStatus = document.getElementById("uploadStatus");
+  const jobStatus = document.getElementById("jobStatus");
+  const out = document.getElementById("out");
 
-    const copyBtn = document.getElementById("copy");
-    const downloadBtn = document.getElementById("download");
-    const clearBtn = document.getElementById("clear");
+  let uploadId = null;
 
-    function setStatus(message, percent = null, isError = false) {
-      statusText.textContent = message;
-      statusText.className = isError ? "err" : "";
-      if (typeof percent === "number") {
-        const p = Math.max(0, Math.min(100, percent));
-        barFill.style.width = p + "%";
-        pct.textContent = p + "%";
-      }
-    }
+  function setStatus(el, msg, isErr=false){
+    el.textContent = msg;
+    el.className = "status" + (isErr ? " err" : "");
+  }
 
-    async function createJob(file) {
-      const form = new FormData();
-      form.append("file", file);
+  async function uploadFile(file){
+    const form = new FormData();
+    form.append("file", file);
+    const r = await fetch("/api/upload", { method: "POST", body: form });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d?.error || "Upload failed");
+    return d;
+  }
 
-      const resp = await fetch("/api/jobs", { method: "POST", body: form });
-      const data = await resp.json().catch(() => ({}));
+  async function startJob(uploadId){
+    const r = await fetch("/api/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uploadId })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d?.error || "Failed to start job");
+    return d.jobId;
+  }
 
-      if (!resp.ok) {
-        const msg = data?.error || "Failed to start job";
-        throw new Error(msg);
-      }
-      return data.jobId;
-    }
-
-    async function fetchJob(jobId) {
+  async function pollJob(jobId){
+    while (true) {
       const r = await fetch(`/api/jobs/${jobId}`);
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j?.error || "Job status failed");
-      return j;
-    }
+      if (!r.ok) throw new Error(j?.error || "Job fetch failed");
 
-    function sleep(ms) {
-      return new Promise(r => setTimeout(r, ms));
-    }
+      const msg = j?.progress?.message ? `${j.progress.message} (${j.progress.pct ?? 0}%)` : "Working…";
+      setStatus(jobStatus, msg);
 
-    go.addEventListener("click", async () => {
-      const f = fileInput.files?.[0];
-      if (!f) {
-        setStatus("Please choose a file first.", 0, true);
+      if (j.status === "done") {
+        out.value = j.resultText || "";
+        setStatus(jobStatus, "Done.");
         return;
       }
-
-      out.value = "";
-      go.disabled = true;
-      setStatus("Uploading…", 5);
-
-      try {
-        // 1) Create job
-        const jobId = await createJob(f);
-
-        // 2) Poll
-        let done = false;
-        while (!done) {
-          await sleep(1200);
-          const job = await fetchJob(jobId);
-
-          if (job?.progress) {
-            const msg = job.progress.message || "Processing…";
-            const p = typeof job.progress.pct === "number" ? job.progress.pct : null;
-            setStatus(msg, p ?? 20);
-          } else {
-            setStatus("Processing…", 20);
-          }
-
-          if (job.status === "done") {
-            out.value = job.resultText || "";
-            setStatus("Done.", 100);
-            done = true;
-          } else if (job.status === "error") {
-            throw new Error(job.error || "Transcription failed.");
-          }
-        }
-
-      } catch (err) {
-        setStatus("Error: " + err.message, 0, true);
-      } finally {
-        go.disabled = false;
+      if (j.status === "error") {
+        throw new Error(j.error || "Transcription failed");
       }
-    });
+      await new Promise(r => setTimeout(r, 1200));
+    }
+  }
 
-    copyBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(out.value || "");
-        setStatus("Copied to clipboard.", 100);
-      } catch {
-        setStatus("Could not copy. Select the text and copy manually.", 100, true);
-      }
-    });
+  uploadBtn.addEventListener("click", async () => {
+    const f = fileInput.files?.[0];
+    if (!f) return setStatus(uploadStatus, "Choose a file first.", true);
 
-    downloadBtn.addEventListener("click", () => {
-      const text = out.value || "";
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "transcript.txt";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      setStatus("Downloaded transcript.txt", 100);
-    });
+    uploadBtn.disabled = true;
+    transcribeBtn.disabled = true;
+    uploadId = null;
+    out.value = "";
+    setStatus(uploadStatus, "Uploading…");
 
-    clearBtn.addEventListener("click", () => {
-      out.value = "";
-      setStatus("Cleared.", 0);
-      barFill.style.width = "0%";
-      pct.textContent = "0%";
-    });
-  </script>
+    try {
+      const result = await uploadFile(f);
+      uploadId = result.uploadId;
+      setStatus(uploadStatus, `Uploaded: ${result.originalName}`);
+      setStatus(jobStatus, "Ready to transcribe.");
+      transcribeBtn.disabled = false;
+    } catch (e) {
+      setStatus(uploadStatus, "Error: " + e.message, true);
+      setStatus(jobStatus, "Waiting for upload…");
+    } finally {
+      uploadBtn.disabled = false;
+    }
+  });
+
+  transcribeBtn.addEventListener("click", async () => {
+    if (!uploadId) return setStatus(jobStatus, "Upload a file first.", true);
+
+    transcribeBtn.disabled = true;
+    setStatus(jobStatus, "Starting job…");
+
+    try {
+      const jobId = await startJob(uploadId);
+      await pollJob(jobId);
+    } catch (e) {
+      setStatus(jobStatus, "Error: " + e.message, true);
+    } finally {
+      transcribeBtn.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
