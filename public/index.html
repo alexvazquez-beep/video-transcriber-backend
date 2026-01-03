@@ -2,275 +2,260 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Video Transcriber</title>
+  <title>TranscriberPro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
     :root{
-      --bg:#f6f7fb;
-      --panel:#ffffff;
+      /* Background + surfaces (mirrors your screenshot vibe) */
+      --bg: #eef0ff;              /* soft periwinkle */
+      --bg2:#f6f7ff;              /* lighter */
+      --card:#ffffff;
+
+      /* Text */
       --text:#0f172a;
-      --muted:#64748b;
-      --border:#e5e7eb;
+      --muted:#667085;
 
-      --brand:#2563eb;     /* primary */
-      --brand-weak:#e8efff;/* tint */
-      --success:#16a34a;
-      --danger:#b91c1c;
+      /* UI */
+      --border:#e6e8f2;
+      --shadow: 0 18px 50px rgba(16,24,40,.12);
+      --shadow2: 0 10px 28px rgba(16,24,40,.10);
+      --radius: 18px;
+      --radius2: 22px;
 
-      --shadow: 0 10px 30px rgba(2,6,23,.08);
-      --radius:16px;
-      --radius2:20px;
+      /* Brand */
+      --brand:#5b6cff;            /* clean “app blue/purple” */
+      --brandDark:#4456ff;
+      --brandTint:#eef0ff;
+
+      /* Status */
+      --danger:#b42318;
+      --success:#067647;
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
       background: var(--bg);
-      color: var(--text);
-      line-height:1.45;
+      line-height: 1.45;
     }
-    a{ color:inherit; text-decoration:none; }
+
+    /* Subtle “blob” decorations WITHOUT gradients */
+    .blob{
+      position: fixed;
+      inset:auto;
+      width: 420px;
+      height: 420px;
+      border-radius: 999px;
+      filter: blur(40px);
+      opacity: .30;
+      pointer-events:none;
+      z-index:0;
+    }
+    .blob.one{ background: #c9d0ff; top:-120px; left:-140px; }
+    .blob.two{ background: #d6f0ff; bottom:-160px; right:-140px; opacity:.26; }
+    .blob.three{ background: #ffd9f1; top: 540px; right:-220px; opacity:.18; }
+
+    /* Page container */
+    .page{
+      position:relative;
+      z-index:1;
+      max-width: 420px;         /* mobile-first like screenshot */
+      margin: 0 auto;
+      padding: 14px 14px 28px;
+    }
 
     /* Top bar */
-    header{
-      background:#fff;
-      border-bottom:1px solid var(--border);
-    }
-    .wrap{
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 16px 20px;
-    }
     .topbar{
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:14px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
       gap:10px;
-      min-width:0;
+      padding: 10px 8px 2px;
     }
-    .logo{
-      width:34px;height:34px;
-      border-radius:10px;
+    .brandmark{
+      width:32px;height:32px;
+      border-radius: 12px;
       background: var(--brand);
       display:grid;place-items:center;
+      box-shadow: 0 10px 20px rgba(91,108,255,.25);
       flex:0 0 auto;
     }
-    .logo svg{ width:18px;height:18px; fill:#fff; }
-    .brand b{
-      font-size:15px;
-      letter-spacing:-.2px;
-      white-space:nowrap;
-      overflow:hidden;text-overflow:ellipsis;
-    }
-    .nav{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      color: var(--muted);
-      font-size:13px;
-      flex-wrap:wrap;
-    }
-    .pill{
-      background: var(--brand-weak);
-      color: #1e40af;
-      border: 1px solid #d6e3ff;
-      border-radius:999px;
-      padding:6px 10px;
-      font-weight:700;
-      font-size:12px;
-      white-space:nowrap;
+    .brandmark svg{ width:16px;height:16px; fill:#fff; }
+    .brandname{
+      font-weight: 900;
+      letter-spacing: -.2px;
+      font-size: 14px;
     }
 
-    /* Main */
-    main .wrap{ padding: 26px 20px 60px; }
-
+    /* Hero */
     .hero{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-      align-items:start;
-      margin-bottom: 18px;
+      margin-top: 12px;
+      text-align:center;
+      padding: 18px 10px 10px;
     }
-    @media (max-width: 920px){
-      .hero{ grid-template-columns: 1fr; }
-    }
-
-    .h-title{
-      margin: 0 0 8px 0;
-      font-size: 34px;
+    .hero h1{
+      margin: 10px 0 8px;
+      font-size: 28px;
       letter-spacing: -1px;
       line-height: 1.1;
     }
-    .h-sub{
-      margin: 0;
+    .hero h1 .accent{ color: var(--brandDark); }
+    .hero p{
+      margin: 0 auto 12px;
+      max-width: 34ch;
+      font-size: 13px;
       color: var(--muted);
-      font-size: 15px;
-      max-width: 58ch;
     }
 
-    /* Steps row */
-    .steps{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 14px;
+    /* Stat row (like screenshot) */
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0 14px;
     }
-    .step{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius: 14px;
-      box-shadow: 0 6px 18px rgba(2,6,23,.05);
-      font-size:13px;
-      color:#334155;
+    .stat{
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 16px;
+      padding: 10px 10px;
+      box-shadow: 0 10px 28px rgba(16,24,40,.08);
     }
-    .dot{
-      width:22px;height:22px;border-radius:999px;
-      display:grid;place-items:center;
-      background: var(--brand-weak);
-      border:1px solid #d6e3ff;
-      color:#1e40af;
-      font-weight:900;
-      font-size:12px;
-      flex:0 0 auto;
+    .stat b{
+      display:block;
+      font-size: 14px;
+      letter-spacing: -.4px;
+    }
+    .stat span{
+      display:block;
+      margin-top: 2px;
+      font-size: 11.5px;
+      color: var(--muted);
     }
 
-    /* Converter card */
+    /* Main card */
     .card{
-      background: var(--panel);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius2);
       box-shadow: var(--shadow);
+      overflow:hidden;
     }
-    .card-head{
-      padding: 16px 16px 0 16px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-    }
-    .card-head h2{
-      margin:0;
-      font-size:16px;
-      letter-spacing:-.2px;
-    }
-    .card-head p{
-      margin: 6px 0 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    .cardpad{ padding: 14px; }
 
-    .card-body{ padding: 16px; }
-
-    /* Dropzone */
-    .drop{
-      border: 2px dashed #cbd5e1;
-      border-radius: var(--radius2);
-      background: #fbfdff;
-      padding: 18px;
-    }
-    .drop-top{
+    .cardtitle{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-    .drop-left{
-      display:flex;
       gap:12px;
-      align-items:flex-start;
-      min-width:0;
+      padding: 14px 14px 0;
     }
-    .upicon{
-      width:40px;height:40px;
+    .cardtitle b{
+      font-size: 13px;
+      letter-spacing: -.2px;
+    }
+    .badge{
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--brandTint);
+      color: #3340d6;
+      border: 1px solid #dfe3ff;
+      white-space:nowrap;
+    }
+
+    /* Upload block */
+    .drop{
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fbfbff;
+      padding: 12px;
+    }
+    .dropTop{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .iconbox{
+      width:38px;height:38px;
       border-radius: 14px;
-      background: var(--brand-weak);
-      border: 1px solid #d6e3ff;
+      background: var(--brandTint);
+      border: 1px solid #dfe3ff;
       display:grid;place-items:center;
       flex:0 0 auto;
     }
-    .upicon svg{ width:20px;height:20px; fill:#1e40af; }
-    .drop-left b{
-      display:block;
-      font-size:14px;
-      letter-spacing:-.2px;
-    }
-    .drop-left span{
-      display:block;
-      color: var(--muted);
-      font-size: 12.5px;
-      margin-top: 3px;
-      max-width: 52ch;
-    }
+    .iconbox svg{ width:18px;height:18px; fill:#3340d6; }
 
-    input[type="file"]{ display:none; }
-
-    .btnrow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .btn{
-      border: 1px solid transparent;
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 800;
-      cursor:pointer;
+    .dropText b{
+      display:block;
       font-size: 13px;
-      display:inline-flex;
+      letter-spacing: -.2px;
+    }
+    .dropText span{
+      display:block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Buttons */
+    .btn{
+      width:100%;
+      margin-top: 10px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor:pointer;
+      display:flex;
       align-items:center;
+      justify-content:center;
       gap:8px;
       user-select:none;
     }
     .btn svg{ width:16px;height:16px; }
-    .btn-primary{
+    .btnPrimary{
       background: var(--brand);
       color:#fff;
+      box-shadow: 0 12px 28px rgba(91,108,255,.28);
     }
-    .btn-primary svg{ fill:#fff; }
-    .btn-primary:hover{ filter: brightness(.95); }
-    .btn-ghost{
+    .btnPrimary:hover{ background: var(--brandDark); }
+    .btnGhost{
       background:#fff;
       border-color: var(--border);
       color: var(--text);
     }
-    .btn-ghost:hover{ background:#f8fafc; }
-
+    .btnGhost:hover{ background:#f7f8ff; }
     .btn:disabled{
-      opacity:.6;
+      opacity:.55;
       cursor:not-allowed;
+      box-shadow:none;
     }
 
     /* Status + progress */
-    .status{
-      margin-top: 14px;
+    .statusRow{
+      margin-top: 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      gap:10px;
       flex-wrap:wrap;
+      font-size: 12px;
       color: var(--muted);
-      font-size: 13px;
     }
     .meter{
-      flex: 1;
-      min-width: 220px;
+      flex:1;
+      min-width: 160px;
       height: 10px;
       border-radius: 999px;
-      background: #e2e8f0;
+      background:#eef2ff;
+      border:1px solid #e6e8f2;
       overflow:hidden;
-      border: 1px solid #e2e8f0;
     }
     .fill{
       height:100%;
@@ -278,333 +263,310 @@
       background: var(--brand);
       transition: width .2s ease;
     }
-    .err{ color: var(--danger); font-weight:800; }
+    .err{ color: var(--danger); font-weight: 900; }
 
-    /* Output */
-    .outwrap{
-      margin-top: 14px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
+    /* Transcript area */
     textarea{
       width:100%;
-      min-height: 320px;
+      margin-top: 12px;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 12px;
+      border-radius: 18px;
+      padding: 12px;
+      min-height: 220px;
       font-size: 13px;
       line-height: 1.5;
       resize: vertical;
       background:#fff;
-    }
-    .tools{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+      box-shadow: inset 0 1px 0 rgba(16,24,40,.03);
     }
 
-    /* Feature tiles below */
-    .below{
-      margin-top: 18px;
-      display:grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 12px;
+    .toolRow{
+      display:flex;
+      gap:10px;
+      margin-top: 10px;
+      flex-wrap:wrap;
     }
-    @media (max-width: 920px){ .below{ grid-template-columns: 1fr; } }
-    .tile{
-      background:#fff;
+    .mini{
+      flex:1;
+      padding: 10px 10px;
+      border-radius: 14px;
       border:1px solid var(--border);
+      background:#fff;
+      font-size: 12px;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: 0 8px 18px rgba(16,24,40,.06);
+    }
+    .mini:hover{ background:#f7f8ff; }
+
+    /* Sections list (mirrors “Common Converters” etc.) */
+    .section{
+      margin-top: 14px;
+      padding: 10px;
       border-radius: var(--radius2);
-      padding: 14px;
-      box-shadow: 0 6px 18px rgba(2,6,23,.05);
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: var(--shadow2);
     }
-    .tile-top{
-      display:flex; align-items:center; gap:10px; margin-bottom:6px;
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 6px 4px 10px;
     }
-    .ibox{
-      width:34px;height:34px;border-radius: 12px;
-      background: var(--brand-weak);
-      border: 1px solid #d6e3ff;
+    .sectionTitle b{
+      font-size: 12.5px;
+      letter-spacing: -.2px;
+    }
+    .sectionTitle span{
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .list{
+      display:grid;
+      gap:10px;
+    }
+    .item{
+      background:#fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 10px 22px rgba(16,24,40,.07);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .itemIcon{
+      width:34px;height:34px;
+      border-radius: 14px;
+      background: var(--brandTint);
+      border: 1px solid #dfe3ff;
       display:grid;place-items:center;
       flex:0 0 auto;
     }
-    .ibox svg{ width:16px;height:16px; fill:#1e40af; }
-    .tile b{ font-size: 13.5px; }
-    .tile p{ margin:0; color: var(--muted); font-size: 13px; }
+    .itemIcon svg{ width:16px;height:16px; fill:#3340d6; }
+    .item b{ display:block; font-size: 12.8px; letter-spacing:-.2px; }
+    .item p{ margin: 4px 0 0; font-size: 12px; color: var(--muted); }
 
-    /* FAQ */
-    .faq{
+    /* Footer (like screenshot bottom) */
+    .footer{
       margin-top: 16px;
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius: var(--radius2);
-      padding: 14px;
-    }
-    details{
-      border-top:1px solid var(--border);
-      padding: 10px 0;
-    }
-    details:first-child{ border-top:0; }
-    summary{
-      cursor:pointer;
-      font-weight:800;
-      font-size: 13.5px;
-      color:#0f172a;
-      list-style:none;
-    }
-    summary::-webkit-details-marker{ display:none; }
-    .ans{
-      margin-top: 6px;
+      text-align:center;
       color: var(--muted);
-      font-size: 13px;
-      max-width: 80ch;
+      font-size: 11.5px;
+      padding: 14px 10px 6px;
     }
-
-    footer{
-      padding: 18px 0;
-      color: var(--muted);
-      font-size: 12.5px;
-      border-top:1px solid var(--border);
-      background:#fff;
-    }
-    .footrow{
-      display:flex;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      gap:10px;
-    }
+    .footer b{ color: var(--text); }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="wrap">
-      <div class="topbar">
-        <div class="brand">
-          <div class="logo" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V7h3.5L14 3.5ZM10 10.2v5.6c0 .7.8 1.1 1.4.7l4.1-2.8c.6-.4.6-1.2 0-1.6l-4.1-2.8c-.6-.4-1.4 0-1.4.9Z"/>
-            </svg>
-          </div>
-          <b>Video Transcriber</b>
-        </div>
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+  <div class="blob three"></div>
 
-        <div class="nav">
-          <span class="pill">Pro · Private beta</span>
-          <span>Accurate transcripts</span>
-          <span>Fast workflow</span>
+  <div class="page">
+    <!-- Top -->
+    <div class="topbar">
+      <div class="brandmark" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V7h3.5L14 3.5ZM10 10.2v5.6c0 .7.8 1.1 1.4.7l4.1-2.8c.6-.4.6-1.2 0-1.6l-4.1-2.8c-.6-.4-1.4 0-1.4.9Z"/>
+        </svg>
+      </div>
+      <div class="brandname">TranscriberPro</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Transcribe <span class="accent">Anything</span>, Reuse <span class="accent">Everything</span></h1>
+      <p>
+        Upload a video or audio file and instantly get a clean transcript you can reuse for captions,
+        hooks, scripts, summaries, and notes.
+      </p>
+
+      <div class="stats" aria-label="Quick stats">
+        <div class="stat">
+          <b>50+</b>
+          <span>formats supported</span>
+        </div>
+        <div class="stat">
+          <b>1M+</b>
+          <span>words processed</span>
+        </div>
+        <div class="stat">
+          <b>99.9%</b>
+          <span>job reliability</span>
         </div>
       </div>
     </div>
-  </header>
 
-  <main>
-    <section class="wrap">
-      <div class="hero">
+    <!-- Main App Card -->
+    <div class="card">
+      <div class="cardtitle">
         <div>
-          <h1 class="h-title">Transcribe video to text — in a clean, pro workflow.</h1>
-          <p class="h-sub">
-            Upload your video first, then start transcription. Copy the result, download it, and reuse it for captions,
-            scripts, VSLs, and content repurposing.
-          </p>
-
-          <div class="steps" aria-label="How it works">
-            <div class="step"><div class="dot">1</div> Upload file</div>
-            <div class="step"><div class="dot">2</div> Start transcription</div>
-            <div class="step"><div class="dot">3</div> Copy / export</div>
+          <b>Video → Transcript</b>
+          <div style="margin-top:4px;font-size:11.5px;color:var(--muted);font-weight:800;">
+            Upload once · Run a job · Copy output
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h2>Video Transcriber Pro</h2>
-              <p>Converter-style UI · No gradients · Built for speed</p>
-            </div>
-            <span class="pill">Testing</span>
-          </div>
-
-          <div class="card-body">
-            <div class="drop" id="dropzone">
-              <div class="drop-top">
-                <div class="drop-left">
-                  <div class="upicon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M12 3 5 10h4v7h6v-7h4l-7-7Zm-9 18h18v2H3v-2Z"/></svg>
-                  </div>
-                  <div>
-                    <b>Drop your video here</b>
-                    <span>MP4, MOV, MP3, WAV. Upload first (like premium tools), then click “Transcribe”.</span>
-                  </div>
-                </div>
-
-                <div class="btnrow">
-                  <button class="btn btn-ghost" id="chooseBtn" type="button">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#0f172a" d="M10 4h10v2H10V4ZM4 6h4v12H4V6Zm6 4h10v2H10v-2Zm0 4h10v2H10v-2Z"/></svg>
-                    Choose file
-                  </button>
-                  <button class="btn btn-primary" id="uploadBtn" type="button" disabled>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2ZM12 2 5 9h4v6h6V9h4l-7-7Z"/></svg>
-                    Upload
-                  </button>
-                </div>
-              </div>
-
-              <input id="file" type="file" accept="video/*,audio/*" />
-              <div class="status" style="margin-top:14px;">
-                <span id="uploadStatus">No file selected.</span>
-              </div>
-            </div>
-
-            <div style="height:12px;"></div>
-
-            <button class="btn btn-primary" id="transcribeBtn" type="button" disabled style="width:100%; justify-content:center;">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>
-              Transcribe
-            </button>
-
-            <div class="status" style="margin-top:12px;">
-              <span id="jobText">Waiting for upload…</span>
-              <div class="meter"><div class="fill" id="fill"></div></div>
-              <span id="jobPct" style="min-width:44px;text-align:right;">0%</span>
-            </div>
-
-            <div class="outwrap">
-              <textarea id="out" placeholder="Transcript will appear here…"></textarea>
-              <div class="tools">
-                <button class="btn btn-ghost" id="copyBtn" type="button">Copy</button>
-                <button class="btn btn-ghost" id="downloadBtn" type="button">Download</button>
-                <button class="btn btn-ghost" id="clearBtn" type="button">Clear</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
+        <div class="badge">Pro · Private Beta</div>
       </div>
 
-      <div class="below" aria-label="Benefits">
-        <div class="tile">
-          <div class="tile-top">
-            <div class="ibox" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .01 20.01A10 10 0 0 0 12 2Zm1 5v5.2l3.5 2.1-.9 1.5L11 13V7h2Z"/></svg>
+      <div class="cardpad">
+        <div class="drop" id="dropzone">
+          <div class="dropTop">
+            <div class="iconbox" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3 5 10h4v7h6v-7h4l-7-7Zm-9 18h18v2H3v-2Z"/></svg>
             </div>
-            <b>Fast workflow</b>
+            <div class="dropText">
+              <b>Upload your file</b>
+              <span>MP4, MOV, MP3, WAV. Drag & drop here or use the button below.</span>
+            </div>
           </div>
-          <p>Upload once, run a background job, and keep your browser responsive.</p>
         </div>
 
-        <div class="tile">
-          <div class="tile-top">
-            <div class="ibox" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.7 9 10 5.2-.3 9-5 9-10V6l-9-4Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg>
-            </div>
-            <b>Reliable</b>
-          </div>
-          <p>Designed to avoid timeout-style failures by separating upload and transcription.</p>
+        <!-- One button ONLY (chooses file + uploads) -->
+        <button class="btn btnPrimary" id="uploadBtn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2 5 9h4v6h6V9h4l-7-7ZM5 20h14v2H5v-2Z"/></svg>
+          Upload video / audio
+        </button>
+
+        <!-- Hidden file input -->
+        <input id="file" type="file" accept="video/*,audio/*" style="display:none;" />
+
+        <button class="btn btnGhost" id="transcribeBtn" type="button" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#0f172a" d="M8 5v14l11-7L8 5Z"/></svg>
+          Start transcription
+        </button>
+
+        <div class="statusRow">
+          <span id="statusText">Waiting for upload…</span>
+          <div class="meter" aria-label="progress"><div class="fill" id="fill"></div></div>
+          <span id="pct" style="min-width:44px;text-align:right;">0%</span>
         </div>
 
-        <div class="tile">
-          <div class="tile-top">
-            <div class="ibox" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm4 4H8a2 2 0 0 0-2 2v16h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 18H8V7h12v16ZM10 11h8v2h-8v-2Zm0 4h8v2h-8v-2Z"/></svg>
-            </div>
-            <b>Export-ready</b>
-          </div>
-          <p>Copy to clipboard or download a .txt in one click.</p>
+        <textarea id="out" placeholder="Transcript will appear here…"></textarea>
+
+        <div class="toolRow">
+          <button class="mini" id="copyBtn" type="button">Copy</button>
+          <button class="mini" id="downloadBtn" type="button">Download</button>
+          <button class="mini" id="clearBtn" type="button">Clear</button>
         </div>
-      </div>
-
-      <div class="faq" aria-label="FAQ">
-        <details open>
-          <summary>What formats do you support?</summary>
-          <div class="ans">MP4, MOV, MP3, WAV. If it plays, we can usually process it.</div>
-        </details>
-        <details>
-          <summary>Why “upload first, then transcribe”?</summary>
-          <div class="ans">It’s the standard pattern for premium tools—more reliable, fewer failures, and easier to add plans/limits later.</div>
-        </details>
-        <details>
-          <summary>Can we add timestamps and summaries?</summary>
-          <div class="ans">Yes. Next steps can include timestamps, auto-summary, and “turn transcript into captions/scripts”.</div>
-        </details>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap">
-      <div class="footrow">
-        <div>© 2026 Video Transcriber</div>
-        <div>Private beta · Payments coming later</div>
       </div>
     </div>
-  </footer>
+
+    <!-- “Common Converters” style sections (adapted for Transcriber) -->
+    <div class="section">
+      <div class="sectionTitle">
+        <b>Common Workflows</b>
+        <span>paid tool features</span>
+      </div>
+      <div class="list">
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>
+          </div>
+          <div>
+            <b>TikTok / Reels Captions</b>
+            <p>Turn a clip into text you can format into on-screen captions and posts.</p>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3V5Zm2 2v10h14V7H5Zm3 1h8v2H8V8Zm0 4h6v2H8v-2Z"/></svg>
+          </div>
+          <div>
+            <b>VSL Scripts & Hooks</b>
+            <p>Transcribe your recordings, then reuse hooks, bullets, and sections.</p>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v4a4 4 0 0 0 4 4h1v3h2v-3h1a4 4 0 0 0 4-4v-1h-2v1a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9a5 5 0 0 1 10 0v3h2V9a7 7 0 0 0-7-7Z"/></svg>
+          </div>
+          <div>
+            <b>Calls, Podcasts, Meetings</b>
+            <p>Keep a written record and quickly search important points.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionTitle">
+        <b>Coming Soon</b>
+        <span>next upgrades</span>
+      </div>
+      <div class="list">
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.7 9 10 5.2-.3 9-5 9-10V6l-9-4Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg>
+          </div>
+          <div>
+            <b>Timestamps + Chapters</b>
+            <p>Generate timestamps so you can jump to key moments faster.</p>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5L5 12l4 4L19.6 5.4 21 7Z"/></svg>
+          </div>
+          <div>
+            <b>Auto Summary + Highlights</b>
+            <p>Summarize the transcript into bullets, hooks, and action steps.</p>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="itemIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm4 4H8a2 2 0 0 0-2 2v16h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 18H8V7h12v16ZM10 11h8v2h-8v-2Zm0 4h8v2h-8v-2Z"/></svg>
+          </div>
+          <div>
+            <b>Export to Captions & Scripts</b>
+            <p>One click: captions format, hooks list, or VSL structure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div><b>TranscriberPro</b> — private beta build for testing.</div>
+      <div>Payments/login can be added later when you’re ready to launch.</div>
+    </div>
+  </div>
 
   <script>
     const fileInput = document.getElementById("file");
-    const chooseBtn = document.getElementById("chooseBtn");
     const uploadBtn = document.getElementById("uploadBtn");
     const transcribeBtn = document.getElementById("transcribeBtn");
-
-    const uploadStatus = document.getElementById("uploadStatus");
-    const jobText = document.getElementById("jobText");
-    const jobPct = document.getElementById("jobPct");
+    const statusText = document.getElementById("statusText");
+    const pct = document.getElementById("pct");
     const fill = document.getElementById("fill");
     const out = document.getElementById("out");
+    const dropzone = document.getElementById("dropzone");
 
     const copyBtn = document.getElementById("copyBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const clearBtn = document.getElementById("clearBtn");
 
-    const dropzone = document.getElementById("dropzone");
-
     let uploadId = null;
-    let selectedFile = null;
 
-    function setUpload(msg, isErr=false){
-      uploadStatus.textContent = msg;
-      uploadStatus.className = isErr ? "err" : "";
-    }
-    function setJob(msg, pct=0, isErr=false){
-      jobText.textContent = msg;
-      jobText.className = isErr ? "err" : "";
-      const p = Math.max(0, Math.min(100, Number(pct)||0));
-      jobPct.textContent = p + "%";
-      fill.style.width = p + "%";
-    }
-
-    function pickFile(f){
-      selectedFile = f || null;
-      uploadId = null;
-      out.value = "";
-      transcribeBtn.disabled = true;
-
-      if (!selectedFile){
-        setUpload("No file selected.");
-        uploadBtn.disabled = true;
-        setJob("Waiting for upload…", 0);
-        return;
+    function setStatus(msg, progress = null, isErr = false) {
+      statusText.textContent = msg;
+      statusText.className = isErr ? "err" : "";
+      if (typeof progress === "number") {
+        const p = Math.max(0, Math.min(100, progress));
+        pct.textContent = p + "%";
+        fill.style.width = p + "%";
       }
-      setUpload(`Selected: ${selectedFile.name}`);
-      uploadBtn.disabled = false;
-      setJob("Ready to upload.", 0);
     }
 
-    chooseBtn.addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", () => pickFile(fileInput.files?.[0]));
-
-    // Drag & drop
-    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.style.borderColor = "#94a3b8"; });
-    dropzone.addEventListener("dragleave", () => { dropzone.style.borderColor = "#cbd5e1"; });
-    dropzone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.style.borderColor = "#cbd5e1";
-      const f = e.dataTransfer.files?.[0];
-      if (f) pickFile(f);
-    });
-
-    async function apiUpload(file){
+    async function apiUpload(file) {
       const form = new FormData();
       form.append("file", file);
       const r = await fetch("/api/upload", { method: "POST", body: form });
@@ -612,87 +574,124 @@
       if (!r.ok) throw new Error(d?.error || "Upload failed");
       return d;
     }
-    async function apiStartJob(uploadId){
+
+    async function apiStartJob(uploadId) {
       const r = await fetch("/api/jobs", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uploadId })
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d?.error || "Failed to start job");
       return d.jobId;
     }
-    async function apiPoll(jobId){
-      while(true){
+
+    async function pollJob(jobId) {
+      while (true) {
         await new Promise(r => setTimeout(r, 1200));
         const r = await fetch(`/api/jobs/${jobId}`);
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j?.error || "Job status failed");
 
-        setJob(j?.progress?.message || "Processing…", j?.progress?.pct ?? 10);
+        const msg = j?.progress?.message || "Processing…";
+        const p = (typeof j?.progress?.pct === "number") ? j.progress.pct : 10;
+        setStatus(msg, p, false);
 
-        if (j.status === "done"){
+        if (j.status === "done") {
           out.value = j.resultText || "";
-          setJob("Done.", 100);
+          setStatus("Done.", 100, false);
           return;
         }
-        if (j.status === "error"){
+        if (j.status === "error") {
           throw new Error(j.error || "Transcription failed.");
         }
       }
     }
 
-    uploadBtn.addEventListener("click", async () => {
-      if (!selectedFile) return;
+    // ===== One-button flow: click upload button -> choose file -> auto upload =====
+    uploadBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async () => {
+      const f = fileInput.files?.[0];
+      if (!f) return;
 
       uploadBtn.disabled = true;
       transcribeBtn.disabled = true;
-      setUpload("Uploading…");
-      setJob("Uploading…", 10);
+      out.value = "";
+      uploadId = null;
+      setStatus("Uploading…", 8, false);
 
-      try{
-        const res = await apiUpload(selectedFile);
+      try {
+        const res = await apiUpload(f);
         uploadId = res.uploadId;
-        setUpload(`Uploaded: ${res.originalName || selectedFile.name}`);
-        setJob("Ready to transcribe.", 0);
+        setStatus(`Uploaded: ${res.originalName || f.name}`, 20, false);
         transcribeBtn.disabled = false;
-      }catch(e){
-        setUpload("Error: " + e.message, true);
-        setJob("Upload failed.", 0, true);
-      }finally{
+        setStatus("Ready to transcribe.", 20, false);
+      } catch (e) {
+        setStatus("Error: " + e.message, 0, true);
+      } finally {
+        uploadBtn.disabled = false;
+        // reset input so selecting same file again triggers change
+        fileInput.value = "";
+      }
+    });
+
+    // Drag & drop (also auto upload)
+    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.style.borderColor = "#b8c0ff"; });
+    dropzone.addEventListener("dragleave", () => { dropzone.style.borderColor = "var(--border)"; });
+    dropzone.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = "var(--border)";
+      const f = e.dataTransfer.files?.[0];
+      if (!f) return;
+
+      uploadBtn.disabled = true;
+      transcribeBtn.disabled = true;
+      out.value = "";
+      uploadId = null;
+      setStatus("Uploading…", 8, false);
+
+      try {
+        const res = await apiUpload(f);
+        uploadId = res.uploadId;
+        setStatus(`Uploaded: ${res.originalName || f.name}`, 20, false);
+        transcribeBtn.disabled = false;
+        setStatus("Ready to transcribe.", 20, false);
+      } catch (e2) {
+        setStatus("Error: " + e2.message, 0, true);
+      } finally {
         uploadBtn.disabled = false;
       }
     });
 
     transcribeBtn.addEventListener("click", async () => {
       if (!uploadId) return;
-
       transcribeBtn.disabled = true;
-      setJob("Starting…", 5);
+      setStatus("Starting transcription…", 30, false);
 
-      try{
+      try {
         const jobId = await apiStartJob(uploadId);
-        setJob("Transcribing…", 20);
-        await apiPoll(jobId);
-      }catch(e){
-        setJob("Error: " + e.message, 0, true);
-      }finally{
+        setStatus("Transcribing…", 40, false);
+        await pollJob(jobId);
+      } catch (e) {
+        setStatus("Error: " + e.message, 0, true);
+      } finally {
         transcribeBtn.disabled = false;
       }
     });
 
     copyBtn.addEventListener("click", async () => {
-      try{
+      try {
         await navigator.clipboard.writeText(out.value || "");
-        setJob("Copied.", 100);
-      }catch{
-        setJob("Copy failed. Copy manually.", 100, true);
+        setStatus("Copied.", 100, false);
+      } catch {
+        setStatus("Copy failed. Copy manually.", 100, true);
       }
     });
 
     downloadBtn.addEventListener("click", () => {
       const text = out.value || "";
-      const blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -701,16 +700,16 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      setJob("Downloaded.", 100);
+      setStatus("Downloaded.", 100, false);
     });
 
     clearBtn.addEventListener("click", () => {
       out.value = "";
-      setJob("Cleared.", 0);
+      setStatus("Cleared.", 0, false);
     });
 
-    // init
-    pickFile(null);
+    // Init
+    setStatus("Waiting for upload…", 0, false);
   </script>
 </body>
 </html>
