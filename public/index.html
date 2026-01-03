@@ -4,11 +4,7 @@
   <meta charset="UTF-8" />
   <title>TranscriberPro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" href="/favicon.png">
 
-  
-  <!-- Favicon (add file later) -->
   <link rel="icon" href="/favicon.ico" />
 
   <style>
@@ -17,18 +13,15 @@
       --card:#ffffff;
       --text:#0f172a;
       --muted:#667085;
-
       --border:#e6e8f2;
-      --shadow:0 18px 50px rgba(16,24,40,.12);
-      --shadow2:0 10px 28px rgba(16,24,40,.10);
-      --radius:18px;
-      --radius2:22px;
-
       --brand:#5b6cff;
       --brandDark:#4456ff;
       --brandTint:#eef0ff;
-
       --danger:#b42318;
+      --radius:18px;
+      --radius2:22px;
+      --shadow:0 18px 50px rgba(16,24,40,.12);
+      --shadow2:0 10px 28px rgba(16,24,40,.10);
     }
 
     *{box-sizing:border-box}
@@ -39,55 +32,47 @@
       color:var(--text);
     }
 
-    .blob{
-      position:fixed;
-      width:520px;height:520px;
-      border-radius:999px;
-      filter:blur(50px);
-      opacity:.25;
-      pointer-events:none;
-      z-index:0;
-    }
-    .blob.one{background:#c9d0ff;top:-160px;left:-200px}
-    .blob.two{background:#d6f0ff;bottom:-220px;right:-220px}
-    .blob.three{background:#ffd9f1;top:520px;right:-260px;opacity:.15}
-
     .page{
-      position:relative;
-      z-index:1;
       max-width:1100px;
       margin:0 auto;
-      padding:14px;
+      padding:24px 16px 40px;
     }
 
+    /* ---------- Header ---------- */
     .topbar{
       display:flex;
       justify-content:center;
       align-items:center;
       gap:10px;
+      margin-top:6px;
     }
     .brandmark{
-      width:32px;height:32px;
+      width:34px;height:34px;
       border-radius:12px;
       background:var(--brand);
       display:grid;place-items:center;
       box-shadow:0 10px 20px rgba(91,108,255,.25);
     }
     .brandmark svg{width:16px;height:16px;fill:#fff}
-    .brandname{font-weight:900;font-size:14px}
+    .brandname{font-weight:900;font-size:15px}
 
-    .hero{text-align:center;margin-top:10px}
+    /* ---------- Hero ---------- */
+    .hero{
+      text-align:center;
+      margin-top:36px; /* extra space added */
+      margin-bottom:24px;
+    }
     .hero h1{
-      font-size:34px;
-      letter-spacing:-1.2px;
-      margin:12px 0 6px;
+      font-size:36px;
+      letter-spacing:-1.3px;
+      margin:0 0 10px;
     }
     .hero h1 span{color:var(--brandDark)}
     .hero p{
       max-width:60ch;
       margin:0 auto;
       color:var(--muted);
-      font-size:14px;
+      font-size:15px;
     }
 
     .stats{
@@ -95,7 +80,7 @@
       grid-template-columns:repeat(3,1fr);
       gap:12px;
       max-width:640px;
-      margin:16px auto;
+      margin:20px auto 0;
     }
     @media(max-width:520px){
       .stats{grid-template-columns:1fr}
@@ -106,15 +91,17 @@
       border-radius:16px;
       padding:12px;
       box-shadow:0 10px 28px rgba(16,24,40,.08);
+      text-align:center;
     }
     .stat b{font-size:15px}
     .stat span{font-size:11.5px;color:var(--muted)}
 
+    /* ---------- Layout ---------- */
     .layout{
       display:grid;
       grid-template-columns:1fr;
-      gap:16px;
-      margin-top:10px;
+      gap:18px;
+      margin-top:28px;
     }
     @media(min-width:900px){
       .layout{grid-template-columns:520px 1fr}
@@ -125,11 +112,10 @@
       border:1px solid var(--border);
       border-radius:var(--radius2);
       box-shadow:var(--shadow);
-      overflow:hidden;
     }
 
     .cardtitle{
-      padding:14px 14px 0;
+      padding:16px;
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -144,30 +130,30 @@
       border:1px solid #dfe3ff;
     }
 
-    .cardpad{padding:14px}
+    .cardpad{padding:16px}
 
     .drop{
       border:1px solid var(--border);
       border-radius:var(--radius);
-      padding:12px;
+      padding:14px;
       background:#fbfbff;
     }
-    .dropTop{display:flex;gap:10px}
+    .dropTop{display:flex;gap:12px}
     .iconbox{
-      width:38px;height:38px;
+      width:40px;height:40px;
       border-radius:14px;
       background:var(--brandTint);
       border:1px solid #dfe3ff;
       display:grid;place-items:center;
     }
     .iconbox svg{width:18px;height:18px;fill:#3340d6}
-    .dropText b{font-size:13px}
+    .dropText b{font-size:14px}
     .dropText span{font-size:12px;color:var(--muted)}
 
     .btn{
       width:100%;
-      margin-top:10px;
-      padding:12px;
+      margin-top:12px;
+      padding:13px;
       border-radius:16px;
       border:1px solid transparent;
       font-weight:900;
@@ -193,7 +179,7 @@
       display:flex;
       gap:10px;
       align-items:center;
-      margin-top:10px;
+      margin-top:12px;
       font-size:12px;
       color:var(--muted);
     }
@@ -215,7 +201,7 @@
 
     textarea{
       width:100%;
-      margin-top:12px;
+      margin-top:14px;
       min-height:220px;
       padding:12px;
       border-radius:18px;
@@ -240,83 +226,91 @@
       background:#fff;
     }
 
-    .section{
-      background:rgba(255,255,255,.5);
+    /* ---------- Features ---------- */
+    .features{
+      background:rgba(255,255,255,.6);
       border:1px solid rgba(255,255,255,.8);
       border-radius:var(--radius2);
-      padding:10px;
+      padding:16px;
       box-shadow:var(--shadow2);
     }
-    .section + .section{margin-top:14px}
-    .sectionTitle{
-      display:flex;
-      justify-content:space-between;
-      font-size:12.5px;
-      margin-bottom:10px;
+    .features h3{
+      margin:0 0 12px;
+      font-size:15px;
     }
-    .item{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:12px;
+    .feature{
       display:flex;
-      gap:10px;
+      gap:12px;
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
       box-shadow:0 10px 22px rgba(16,24,40,.07);
     }
-    .item + .item{margin-top:10px}
-    .itemIcon{
-      width:34px;height:34px;
+    .feature + .feature{margin-top:12px}
+    .featureIcon{
+      width:36px;height:36px;
       border-radius:14px;
       background:var(--brandTint);
       border:1px solid #dfe3ff;
       display:grid;place-items:center;
     }
-    .itemIcon svg{width:16px;height:16px;fill:#3340d6}
-    .item b{font-size:12.8px}
-    .item p{font-size:12px;color:var(--muted)}
+    .featureIcon svg{width:16px;height:16px;fill:#3340d6}
+    .feature b{font-size:13.5px}
+    .feature p{margin:4px 0 0;font-size:12px;color:var(--muted)}
 
+    /* ---------- Footer ---------- */
     .footer{
-      margin-top:16px;
+      margin-top:36px;
       text-align:center;
-      font-size:11.5px;
+      font-size:12px;
       color:var(--muted);
     }
   </style>
 </head>
 
 <body>
-  <div class="blob one"></div>
-  <div class="blob two"></div>
-  <div class="blob three"></div>
-
   <div class="page">
+
+    <!-- Header -->
     <div class="topbar">
       <div class="brandmark">
-        <svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V7h3.5L14 3.5ZM10 10.2v5.6c0 .7.8 1.1 1.4.7l4.1-2.8c.6-.4.6-1.2 0-1.6l-4.1-2.8c-.6-.4-1.4 0-1.4.9Z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/></svg>
       </div>
       <div class="brandname">TranscriberPro</div>
     </div>
 
+    <!-- Hero -->
     <div class="hero">
       <h1>Transcribe <span>Anything</span>, Reuse <span>Everything</span></h1>
-      <p>Upload a video or audio file and get a clean transcript ready for captions, hooks, scripts, and summaries.</p>
+      <p>
+        Instantly turn video and audio files into clean, accurate transcripts
+        you can reuse for captions, scripts, summaries, and documentation.
+      </p>
+
       <div class="stats">
-        <div class="stat"><b>50+</b><span>formats supported</span></div>
-        <div class="stat"><b>1M+</b><span>words processed</span></div>
-        <div class="stat"><b>99.9%</b><span>job reliability</span></div>
+        <div class="stat"><b>50+</b><span>Formats supported</span></div>
+        <div class="stat"><b>Fast</b><span>AI-powered processing</span></div>
+        <div class="stat"><b>Accurate</b><span>Production-ready text</span></div>
       </div>
     </div>
 
+    <!-- Main Layout -->
     <div class="layout">
+
+      <!-- Tool -->
       <div class="card">
         <div class="cardtitle">
           <b>Video → Transcript</b>
-          <div class="badge">Private Beta</div>
+          <div class="badge">AI Powered</div>
         </div>
+
         <div class="cardpad">
           <div class="drop" id="dropzone">
             <div class="dropTop">
-              <div class="iconbox"><svg viewBox="0 0 24 24"><path d="M12 3 5 10h4v7h6v-7h4l-7-7Z"/></svg></div>
+              <div class="iconbox">
+                <svg viewBox="0 0 24 24"><path d="M12 3 5 10h4v7h6v-7h4Z"/></svg>
+              </div>
               <div class="dropText">
                 <b>Upload your file</b>
                 <span>MP4, MOV, MP3, WAV</span>
@@ -345,35 +339,52 @@
         </div>
       </div>
 
-      <div>
-        <div class="section">
-          <div class="sectionTitle"><b>Common Workflows</b><span>Paid tool features</span></div>
-          <div class="item">
-            <div class="itemIcon"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4z"/></svg></div>
-            <div><b>TikTok / Reels Captions</b><p>Turn clips into captions-ready text.</p></div>
-          </div>
-          <div class="item">
-            <div class="itemIcon"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3z"/></svg></div>
-            <div><b>VSL Scripts</b><p>Reuse recordings into sales copy.</p></div>
+      <!-- Features -->
+      <div class="features">
+        <h3>Why use TranscriberPro?</h3>
+
+        <div class="feature">
+          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4Z"/></svg></div>
+          <div>
+            <b>Clean, readable transcripts</b>
+            <p>No filler. No messy formatting. Just usable text.</p>
           </div>
         </div>
 
-        <div class="section">
-          <div class="sectionTitle"><b>Coming Soon</b><span>Next upgrades</span></div>
-          <div class="item">
-            <div class="itemIcon"><svg viewBox="0 0 24 24"><path d="M12 2 3 6v6"/></svg></div>
-            <div><b>Timestamps & Chapters</b><p>Jump to key moments instantly.</p></div>
+        <div class="feature">
+          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M12 2 3 6v6"/></svg></div>
+          <div>
+            <b>Video & audio supported</b>
+            <p>Upload interviews, podcasts, calls, or screen recordings.</p>
           </div>
         </div>
 
-        <div class="footer">
-          <b>TranscriberPro</b> · Private beta · Payments later
+        <div class="feature">
+          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3Z"/></svg></div>
+          <div>
+            <b>Built for reuse</b>
+            <p>Perfect for captions, hooks, scripts, notes, and summaries.</p>
+          </div>
+        </div>
+
+        <div class="feature">
+          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M12 8v8m4-4H8"/></svg></div>
+          <div>
+            <b>Simple & fast workflow</b>
+            <p>Upload → Transcribe → Copy or download.</p>
+          </div>
         </div>
       </div>
+
     </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      TranscriberPro · Powered by AI
+    </div>
+
   </div>
 
-  <!-- UI logic -->
   <script src="/app.js"></script>
 </body>
 </html>
