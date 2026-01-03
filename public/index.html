@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>TranscriberPro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <link rel="icon" href="/favicon.ico" />
 
   <style>
@@ -59,7 +58,7 @@
     /* ---------- Hero ---------- */
     .hero{
       text-align:center;
-      margin-top:36px; /* extra space added */
+      margin-top:44px; /* more space between logo and hero */
       margin-bottom:24px;
     }
     .hero h1{
@@ -69,17 +68,18 @@
     }
     .hero h1 span{color:var(--brandDark)}
     .hero p{
-      max-width:60ch;
+      max-width:62ch;
       margin:0 auto;
       color:var(--muted);
       font-size:15px;
+      line-height:1.45;
     }
 
     .stats{
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:12px;
-      max-width:640px;
+      max-width:720px;
       margin:20px auto 0;
     }
     @media(max-width:520px){
@@ -93,8 +93,18 @@
       box-shadow:0 10px 28px rgba(16,24,40,.08);
       text-align:center;
     }
-    .stat b{font-size:15px}
-    .stat span{font-size:11.5px;color:var(--muted)}
+    .stat b{
+      display:block;              /* fixes "FastAI..." merge */
+      font-size:15px;
+      line-height:1.1;
+    }
+    .stat span{
+      display:block;              /* fixes "AccurateProduction..." merge */
+      margin-top:4px;
+      font-size:11.5px;
+      color:var(--muted);
+      line-height:1.2;
+    }
 
     /* ---------- Layout ---------- */
     .layout{
@@ -102,6 +112,7 @@
       grid-template-columns:1fr;
       gap:18px;
       margin-top:28px;
+      align-items:stretch; /* keep desktop columns same height */
     }
     @media(min-width:900px){
       .layout{grid-template-columns:520px 1fr}
@@ -138,13 +149,14 @@
       padding:14px;
       background:#fbfbff;
     }
-    .dropTop{display:flex;gap:12px}
+    .dropTop{display:flex;gap:12px;align-items:center}
     .iconbox{
       width:40px;height:40px;
       border-radius:14px;
       background:var(--brandTint);
       border:1px solid #dfe3ff;
       display:grid;place-items:center;
+      flex:0 0 auto;
     }
     .iconbox svg{width:18px;height:18px;fill:#3340d6}
     .dropText b{font-size:14px}
@@ -226,18 +238,56 @@
       background:#fff;
     }
 
-    /* ---------- Features ---------- */
+    /* ---------- Features panel ---------- */
     .features{
       background:rgba(255,255,255,.6);
       border:1px solid rgba(255,255,255,.8);
       border-radius:var(--radius2);
       padding:16px;
       box-shadow:var(--shadow2);
+      height:100%; /* fill the right column height on desktop */
     }
-    .features h3{
-      margin:0 0 12px;
+    .featuresHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .featuresHeader h3{
+      margin:0;
       font-size:15px;
+      letter-spacing:-.2px;
     }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.35;
+    }
+    .pill{
+      font-size:11px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--border);
+      color:#344054;
+      white-space:nowrap;
+    }
+
+    .featureGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+    @media(min-width:900px){
+      .featureGrid{
+        grid-template-columns:1fr;
+      }
+    }
+
     .feature{
       display:flex;
       gap:12px;
@@ -247,17 +297,38 @@
       background:#fff;
       box-shadow:0 10px 22px rgba(16,24,40,.07);
     }
-    .feature + .feature{margin-top:12px}
     .featureIcon{
       width:36px;height:36px;
       border-radius:14px;
       background:var(--brandTint);
       border:1px solid #dfe3ff;
       display:grid;place-items:center;
+      flex:0 0 auto;
     }
-    .featureIcon svg{width:16px;height:16px;fill:#3340d6}
-    .feature b{font-size:13.5px}
-    .feature p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+    .featureIcon svg{width:18px;height:18px;fill:#3340d6}
+    .feature b{font-size:13.5px;display:block}
+    .feature p{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.35}
+
+    .miniList{
+      margin-top:14px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#fff;
+      box-shadow:0 10px 22px rgba(16,24,40,.07);
+    }
+    .miniList h4{
+      margin:0 0 8px;
+      font-size:12.8px;
+      letter-spacing:-.1px;
+    }
+    .bullets{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
 
     /* ---------- Footer ---------- */
     .footer{
@@ -265,6 +336,14 @@
       text-align:center;
       font-size:12px;
       color:var(--muted);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .footDot{
+      width:4px;height:4px;border-radius:99px;background:#98a2b3;display:inline-block;
     }
   </style>
 </head>
@@ -274,8 +353,10 @@
 
     <!-- Header -->
     <div class="topbar">
-      <div class="brandmark">
-        <svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/></svg>
+      <div class="brandmark" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/>
+        </svg>
       </div>
       <div class="brandname">TranscriberPro</div>
     </div>
@@ -284,8 +365,8 @@
     <div class="hero">
       <h1>Transcribe <span>Anything</span>, Reuse <span>Everything</span></h1>
       <p>
-        Instantly turn video and audio files into clean, accurate transcripts
-        you can reuse for captions, scripts, summaries, and documentation.
+        Instantly turn video and audio files into clean, accurate transcripts you can reuse
+        for captions, scripts, summaries, and documentation.
       </p>
 
       <div class="stats">
@@ -308,7 +389,7 @@
         <div class="cardpad">
           <div class="drop" id="dropzone">
             <div class="dropTop">
-              <div class="iconbox">
+              <div class="iconbox" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 3 5 10h4v7h6v-7h4Z"/></svg>
               </div>
               <div class="dropText">
@@ -341,38 +422,121 @@
 
       <!-- Features -->
       <div class="features">
-        <h3>Why use TranscriberPro?</h3>
-
-        <div class="feature">
-          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4Z"/></svg></div>
+        <div class="featuresHeader">
           <div>
-            <b>Clean, readable transcripts</b>
-            <p>No filler. No messy formatting. Just usable text.</p>
+            <h3>Why use TranscriberPro?</h3>
+            <div class="sub">Everything you need to go from file → transcript → reusable content.</div>
+          </div>
+          <div class="pill">Benefits</div>
+        </div>
+
+        <div class="featureGrid">
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Clean, readable transcripts</b>
+              <p>No filler. No messy formatting. Just usable text you can paste anywhere.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Zm13 3 3-2v8l-3-2v-4Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Video & audio supported</b>
+              <p>Upload interviews, podcasts, calls, voice notes, or screen recordings.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5 0 .7-.14 1.36-.4 1.96l1.52 1.52A6.99 6.99 0 0 0 19 13c0-3.87-3.13-7-7-7Zm0 10c-2.76 0-5-2.24-5-5 0-.7.14-1.36.4-1.96L5.88 7.52A6.99 6.99 0 0 0 5 11c0 3.87 3.13 7 7 7v3l4-4-4-4v3Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Built for reuse</b>
+              <p>Perfect for captions, hooks, scripts, notes, summaries, and documentation.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M13 3h-2v8l6 3 1-1.7-5-2.3V3Zm-1 19a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Simple & fast workflow</b>
+              <p>Upload → Transcribe → Copy or download. No extra steps.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M9 21h6v-2H9v2Zm3-20a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3.26A7 7 0 0 0 12 1Zm3 11.5-1 .84V16h-4v-2.66l-1-.84A5 5 0 1 1 15 12.5Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Great for content creators</b>
+              <p>Turn one recording into multiple pieces of content faster.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Reliable results</b>
+              <p>Consistent output you can trust for work, clients, and publishing.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1Zm4 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h12v14Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Copy + download in one click</b>
+              <p>Instantly copy the transcript or download a .txt file.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="featureIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 6h10v2H7V6Zm0 5h10v2H7v-2Zm0 5h7v2H7v-2Z"></path>
+              </svg>
+            </div>
+            <div>
+              <b>Clean formatting by default</b>
+              <p>Readable spacing and structure so your output looks professional.</p>
+            </div>
           </div>
         </div>
 
-        <div class="feature">
-          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M12 2 3 6v6"/></svg></div>
-          <div>
-            <b>Video & audio supported</b>
-            <p>Upload interviews, podcasts, calls, or screen recordings.</p>
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3Z"/></svg></div>
-          <div>
-            <b>Built for reuse</b>
-            <p>Perfect for captions, hooks, scripts, notes, and summaries.</p>
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="featureIcon"><svg viewBox="0 0 24 24"><path d="M12 8v8m4-4H8"/></svg></div>
-          <div>
-            <b>Simple & fast workflow</b>
-            <p>Upload → Transcribe → Copy or download.</p>
-          </div>
+        <div class="miniList">
+          <h4>Best uses</h4>
+          <ul class="bullets">
+            <li>Captions for TikTok / Reels / Shorts</li>
+            <li>Podcast & interview show notes</li>
+            <li>Client call summaries & internal documentation</li>
+            <li>VSL script drafts from recorded ideas</li>
+            <li>Fast note-taking from meetings</li>
+          </ul>
         </div>
       </div>
 
@@ -380,7 +544,9 @@
 
     <!-- Footer -->
     <div class="footer">
-      TranscriberPro · Powered by AI
+      <span>TranscriberPro</span>
+      <span class="footDot"></span>
+      <span>Powered by AI</span>
     </div>
 
   </div>
