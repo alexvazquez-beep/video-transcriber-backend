@@ -6,218 +6,489 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    :root {
-      --bg: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e5e7eb;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --danger: #b91c1c;
-      --radius: 14px;
+    :root{
+      --bg:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+
+      /* Simple (no gradients) but “alive” */
+      --brand:#2563eb;        /* header / primary */
+      --brand-ink:#1e40af;    /* deeper blue */
+      --tint:#eff6ff;         /* soft blue tint for sections */
+      --card:#ffffff;
+
+      --success:#16a34a;
+      --warning:#f59e0b;
+      --danger:#b91c1c;
+
+      --radius:14px;
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.45;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.45;
     }
 
-    /* ---------- Layout ---------- */
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px;
+    /* ---------- Header (color, no gradient) ---------- */
+    header{
+      background: var(--brand);
+      color:#fff;
+      border-bottom: 1px solid rgba(255,255,255,.18);
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding: 20px 24px;
+    }
+    .header-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .brandmark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background: rgba(255,255,255,.14);
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.2);
+      flex:0 0 auto;
+    }
+    .brandmark svg{ width:20px; height:20px; fill:#fff; }
+    .brand-title{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .brand-title b{
+      font-size:16px;
+      letter-spacing:-.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand-title span{
+      font-size:12px;
+      opacity:.85;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .pill{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.25);
+      white-space:nowrap;
     }
 
-    header {
+    /* ---------- Hero ---------- */
+    main{ padding: 34px 0 70px; }
+    .hero{
+      background: var(--tint);
       border-bottom: 1px solid var(--border);
     }
-
-    header .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items:start;
     }
-
-    .logo {
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      font-size: 18px;
+    @media (max-width: 900px){
+      .hero-grid{ grid-template-columns: 1fr; }
     }
-
-    .badge {
-      font-size: 12px;
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 999px;
-      color: var(--muted);
-    }
-
-    main {
-      padding: 60px 0;
-    }
-
-    .hero {
-      max-width: 640px;
-      margin-bottom: 48px;
-    }
-
-    .hero h1 {
+    .hero h1{
+      margin: 0 0 10px 0;
       font-size: 38px;
       letter-spacing: -1px;
-      margin-bottom: 14px;
+      line-height: 1.1;
     }
-
-    .hero p {
-      color: var(--muted);
+    .hero p{
+      margin: 0 0 14px 0;
+      color: #334155;
       font-size: 16px;
     }
-
-    /* ---------- App Card ---------- */
-    .card {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      max-width: 520px;
-    }
-
-    .card h2 {
-      margin-top: 0;
-      font-size: 18px;
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-
-    input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      font-size: 14px;
-    }
-
-    button {
+    .hero-cta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
       margin-top: 14px;
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: var(--radius);
-      border: none;
-      cursor: pointer;
     }
-
-    .primary {
-      background: var(--accent);
-      color: #fff;
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background:#fff;
+      border: 1px solid var(--border);
+      color:#0f172a;
+      font-size: 13px;
+      box-shadow: 0 6px 18px rgba(2,6,23,.06);
     }
+    .tag svg{ width:16px; height:16px; fill: var(--brand-ink); }
 
-    .primary:hover {
-      background: var(--accent-hover);
+    /* ---------- Feature cards ---------- */
+    .features{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
     }
-
-    .secondary {
+    @media (max-width: 900px){
+      .features{ grid-template-columns: 1fr; }
+    }
+    .feat{
       background: #fff;
       border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 6px 18px rgba(2,6,23,.05);
+    }
+    .feat-top{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+    .iconbox{
+      width:36px;
+      height:36px;
+      border-radius: 12px;
+      background: var(--tint);
+      border: 1px solid #dbeafe;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .iconbox svg{ width:18px; height:18px; fill: var(--brand-ink); }
+    .feat b{ font-size: 14px; }
+    .feat p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    /* ---------- App area ---------- */
+    .app-wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .app-grid{
+      display:grid;
+      grid-template-columns: 520px 1fr;
+      gap: 16px;
+      margin-top: 22px;
+    }
+    @media (max-width: 900px){
+      .app-grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .card h2{
+      margin:0 0 6px 0;
+      font-size: 16px;
+      letter-spacing: -.2px;
+    }
+    .card .sub{
+      margin:0 0 14px 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
-    .status {
-      margin-top: 14px;
+    .field{
+      border:1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+    }
+    input[type="file"]{
+      width:100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .btn{
+      margin-top: 12px;
+      width:100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary{
+      background: var(--brand);
+      color:#fff;
+    }
+    .btn-primary:hover{ background: var(--brand-ink); }
+    .btn-secondary{
+      background:#fff;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover{
+      border-color:#cbd5e1;
+      background:#f8fafc;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .status{
+      margin-top: 12px;
       font-size: 13px;
       color: var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
-
-    .error {
-      color: var(--danger);
-      font-weight: 600;
+    .meter{
+      flex:1;
+      height:10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow:hidden;
+      border: 1px solid #e2e8f0;
     }
+    .fill{
+      height:100%;
+      width:0%;
+      background: var(--brand);
+      transition: width .25s ease;
+    }
+    .err{ color: var(--danger); font-weight: 700; }
 
-    textarea {
-      margin-top: 24px;
-      width: 100%;
-      min-height: 320px;
-      border-radius: var(--radius);
+    textarea{
+      width:100%;
+      min-height: 420px;
       border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 14px;
       font-size: 14px;
+      line-height: 1.5;
       resize: vertical;
     }
-
-    footer {
-      border-top: 1px solid var(--border);
-      margin-top: 80px;
-      padding: 24px 0;
+    .tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .mini{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor:pointer;
+      font-weight: 800;
       font-size: 13px;
+    }
+    .mini:hover{ background: #f8fafc; }
+
+    /* ---------- Footer ---------- */
+    footer{
+      margin-top: 70px;
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+    }
+    footer .container{
       color: var(--muted);
+      font-size: 13px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
-
-    footer .container {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    @media (max-width: 700px) {
-      .hero h1 {
-        font-size: 30px;
-      }
+    .tiny{
+      font-size:12px;
+      opacity:.9;
     }
   </style>
 </head>
 
 <body>
-
   <!-- Header -->
   <header>
     <div class="container">
-      <div class="logo">Video Transcriber Pro</div>
-      <div class="badge">Private Beta</div>
+      <div class="header-row">
+        <div class="brand">
+          <div class="brandmark" aria-hidden="true">
+            <!-- simple “doc + play” icon -->
+            <svg viewBox="0 0 24 24">
+              <path d="M6 2h8l4 4v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V7h3.5L14 3.5ZM10 10.2v5.6c0 .7.8 1.1 1.4.7l4.1-2.8c.6-.4.6-1.2 0-1.6l-4.1-2.8c-.6-.4-1.4 0-1.4.9Z"/>
+            </svg>
+          </div>
+          <div class="brand-title">
+            <b>Video Transcriber Pro</b>
+            <span>Upload. Transcribe. Copy. Done.</span>
+          </div>
+        </div>
+        <div class="pill">Private Beta · Paid tool (testing)</div>
+      </div>
     </div>
   </header>
 
-  <!-- Main -->
-  <main>
+  <!-- Hero -->
+  <section class="hero">
     <div class="container">
+      <div class="hero-grid">
+        <div>
+          <h1>Turn any video into a clean transcript in minutes.</h1>
+          <p>
+            A lightweight transcription tool built for creators, marketers, and business owners.
+            Upload a file, get accurate text, and reuse it for captions, posts, VSLs, or scripts.
+          </p>
 
-      <!-- Hero -->
-      <section class="hero">
-        <h1>Turn videos into clean, accurate transcripts</h1>
-        <p>
-          Upload a video or audio file and get a high-quality transcript in minutes.
-          Built for creators, marketers, and professionals who value speed and accuracy.
-        </p>
-      </section>
+          <div class="hero-cta">
+            <div class="tag">
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .01 20.01A10 10 0 0 0 12 2Zm1 5v5.2l3.5 2.1-.9 1.5L11 13V7h2Z"/></svg>
+              Fast processing
+            </div>
+            <div class="tag">
+              <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5 3.8 9.7 9 10 5.2-.3 9-5 9-10V6l-9-4Zm-1 14-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg>
+              Reliable job system
+            </div>
+            <div class="tag">
+              <svg viewBox="0 0 24 24"><path d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM4 3h16a2 2 0 0 1 2 2v14l-4-3H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
+              Clean readable output
+            </div>
+          </div>
 
-      <!-- App -->
-      <section class="card">
-        <h2>Transcribe a file</h2>
-        <p>Supported formats: MP4, MOV, MP3, WAV. Max length depends on plan.</p>
+          <div class="features">
+            <div class="feat">
+              <div class="feat-top">
+                <div class="iconbox">
+                  <svg viewBox="0 0 24 24"><path d="M4 4h10l6 6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm9 1.5V11h5.5L13 5.5Z"/></svg>
+                </div>
+                <b>Upload any file</b>
+              </div>
+              <p>MP4, MOV, MP3, WAV — perfect for podcasts, calls, or content clips.</p>
+            </div>
 
-        <input id="file" type="file" accept="video/*,audio/*" />
+            <div class="feat">
+              <div class="feat-top">
+                <div class="iconbox">
+                  <svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-7 7v4a4 4 0 0 0 4 4h1v3h2v-3h1a4 4 0 0 0 4-4v-1h-2v1a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-4a5 5 0 0 1 10 0v3h2v-3a7 7 0 0 0-7-7Z"/></svg>
+                </div>
+                <b>Accurate transcripts</b>
+              </div>
+              <p>Designed for clear speech and fast iteration while you’re testing.</p>
+            </div>
 
-        <button id="uploadBtn" class="primary">Upload file</button>
-        <button id="transcribeBtn" class="secondary" disabled>Start transcription</button>
+            <div class="feat">
+              <div class="feat-top">
+                <div class="iconbox">
+                  <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm4 4H8a2 2 0 0 0-2 2v16h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 18H8V7h12v16ZM10 11h8v2h-8v-2Zm0 4h8v2h-8v-2Z"/></svg>
+                </div>
+                <b>Copy & export</b>
+              </div>
+              <p>One click to copy or download as a .txt file for captions/scripts.</p>
+            </div>
+          </div>
+        </div>
 
-        <div id="status" class="status">Waiting for file…</div>
+        <!-- Small “product card” -->
+        <div class="card" style="align-self:start;">
+          <h2>What this is built for</h2>
+          <p class="sub">
+            Perfect for turning content into assets:
+          </p>
+          <div style="display:grid; gap:10px;">
+            <div class="tag" style="box-shadow:none;">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 4h10v2H4V8Zm0 4h16v2H4v-2Zm0 4h10v2H4v-2Z"/></svg>
+              TikTok / Reels captions
+            </div>
+            <div class="tag" style="box-shadow:none;">
+              <svg viewBox="0 0 24 24"><path d="M3 5h18v14H3V5Zm2 2v10h14V7H5Zm3 1h8v2H8V8Zm0 4h6v2H8v-2Z"/></svg>
+              VSL scripts & hooks
+            </div>
+            <div class="tag" style="box-shadow:none;">
+              <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 8L2 5v14l10 5 10-5V5l-10 5Z"/></svg>
+              Course content & notes
+            </div>
+          </div>
+          <p class="sub" style="margin-top:12px;">
+            Payments & user accounts can be added later. Right now, this is your private beta.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <textarea id="output" placeholder="Your transcript will appear here…"></textarea>
-      </section>
+  <!-- App -->
+  <main>
+    <div class="app-wrap">
+      <div class="app-grid">
+        <section class="card">
+          <h2>1) Upload</h2>
+          <p class="sub">Upload first, then start transcription. This reduces errors and feels like a premium tool.</p>
 
+          <div class="field">
+            <input id="file" type="file" accept="video/*,audio/*" />
+            <button id="uploadBtn" class="btn btn-primary">Upload file</button>
+            <div id="uploadStatus" class="status">Waiting for file…</div>
+          </div>
+
+          <div style="height:14px"></div>
+
+          <h2>2) Transcribe</h2>
+          <p class="sub">Start a background job and watch progress. No browser timeouts.</p>
+
+          <button id="transcribeBtn" class="btn btn-secondary" disabled>Start transcription</button>
+
+          <div class="status">
+            <span id="jobText">Waiting for upload…</span>
+            <div class="meter" aria-label="progress"><div id="fill" class="fill"></div></div>
+            <span id="jobPct" style="min-width:44px;text-align:right;">0%</span>
+          </div>
+
+          <div class="tiny" style="margin-top:10px;">
+            Tip: For best accuracy, upload videos with clear dialogue and minimal background music.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Transcript</h2>
+          <p class="sub">Copy, download, and reuse the transcript anywhere.</p>
+
+          <textarea id="out" placeholder="Your transcript will appear here…"></textarea>
+
+          <div class="tools">
+            <button class="mini" id="copyBtn">Copy</button>
+            <button class="mini" id="downloadBtn">Download .txt</button>
+            <button class="mini" id="clearBtn">Clear</button>
+          </div>
+
+          <div class="tiny" style="margin-top:10px;">
+            Coming soon: timestamps, summaries, and speaker labels.
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 
@@ -225,98 +496,155 @@
   <footer>
     <div class="container">
       <div>© 2026 Video Transcriber Pro</div>
-      <div>Internal testing version · Payments coming soon</div>
+      <div class="tiny">Private beta · Built for speed, accuracy, and reuse</div>
     </div>
   </footer>
 
-  <!-- Script -->
   <script>
     const fileInput = document.getElementById("file");
     const uploadBtn = document.getElementById("uploadBtn");
     const transcribeBtn = document.getElementById("transcribeBtn");
-    const statusEl = document.getElementById("status");
-    const output = document.getElementById("output");
+
+    const uploadStatus = document.getElementById("uploadStatus");
+    const jobText = document.getElementById("jobText");
+    const jobPct = document.getElementById("jobPct");
+    const fill = document.getElementById("fill");
+
+    const out = document.getElementById("out");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const clearBtn = document.getElementById("clearBtn");
 
     let uploadId = null;
 
-    function setStatus(text, error = false) {
-      statusEl.textContent = text;
-      statusEl.className = "status" + (error ? " error" : "");
+    function setUploadStatus(msg, isErr=false){
+      uploadStatus.textContent = msg;
+      uploadStatus.className = "status" + (isErr ? " err" : "");
     }
 
-    uploadBtn.onclick = async () => {
-      const file = fileInput.files[0];
-      if (!file) return setStatus("Please select a file.", true);
+    function setJobStatus(msg, pct=0, isErr=false){
+      jobText.textContent = msg;
+      jobText.className = isErr ? "err" : "";
+      const p = Math.max(0, Math.min(100, Number(pct) || 0));
+      jobPct.textContent = p + "%";
+      fill.style.width = p + "%";
+    }
+
+    async function uploadFile(file){
+      const form = new FormData();
+      form.append("file", file);
+      const r = await fetch("/api/upload", { method: "POST", body: form });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d?.error || "Upload failed");
+      return d;
+    }
+
+    async function startJob(uploadId){
+      const r = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadId })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d?.error || "Failed to start job");
+      return d.jobId;
+    }
+
+    async function pollJob(jobId){
+      while (true) {
+        await new Promise(r => setTimeout(r, 1200));
+        const r = await fetch(`/api/jobs/${jobId}`);
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j?.error || "Job status failed");
+
+        const msg = j?.progress?.message || "Processing…";
+        const p = j?.progress?.pct ?? 10;
+        setJobStatus(msg, p);
+
+        if (j.status === "done") {
+          out.value = j.resultText || "";
+          setJobStatus("Done.", 100);
+          return;
+        }
+        if (j.status === "error") {
+          throw new Error(j.error || "Transcription failed.");
+        }
+      }
+    }
+
+    uploadBtn.addEventListener("click", async () => {
+      const f = fileInput.files?.[0];
+      if (!f) {
+        setUploadStatus("Choose a file first.", true);
+        return;
+      }
 
       uploadBtn.disabled = true;
       transcribeBtn.disabled = true;
-      output.value = "";
-      setStatus("Uploading file…");
+      out.value = "";
+      uploadId = null;
+
+      setUploadStatus("Uploading…");
+      setJobStatus("Waiting for upload…", 0);
 
       try {
-        const form = new FormData();
-        form.append("file", file);
-
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: form
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Upload failed");
-
-        uploadId = data.uploadId;
-        setStatus("File uploaded. Ready to transcribe.");
+        const result = await uploadFile(f);
+        uploadId = result.uploadId;
+        setUploadStatus(`Uploaded: ${result.originalName}`);
+        setJobStatus("Ready to transcribe.", 0);
         transcribeBtn.disabled = false;
-      } catch (err) {
-        setStatus(err.message, true);
+      } catch (e) {
+        setUploadStatus("Error: " + e.message, true);
+        setJobStatus("Upload required.", 0, true);
       } finally {
         uploadBtn.disabled = false;
       }
-    };
+    });
 
-    transcribeBtn.onclick = async () => {
+    transcribeBtn.addEventListener("click", async () => {
       if (!uploadId) return;
 
       transcribeBtn.disabled = true;
-      setStatus("Starting transcription…");
+      setJobStatus("Starting job…", 5);
 
       try {
-        const res = await fetch("/api/jobs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uploadId })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Job failed");
-
-        const jobId = data.jobId;
-
-        while (true) {
-          await new Promise(r => setTimeout(r, 1200));
-          const r = await fetch(`/api/jobs/${jobId}`);
-          const j = await r.json();
-
-          if (j.status === "done") {
-            output.value = j.resultText || "";
-            setStatus("Transcription completed.");
-            break;
-          }
-
-          if (j.status === "error") {
-            throw new Error(j.error || "Transcription error");
-          }
-
-          setStatus(j.progress?.message || "Processing…");
-        }
-      } catch (err) {
-        setStatus(err.message, true);
+        const jobId = await startJob(uploadId);
+        setJobStatus("Transcribing…", 15);
+        await pollJob(jobId);
+      } catch (e) {
+        setJobStatus("Error: " + e.message, 0, true);
       } finally {
         transcribeBtn.disabled = false;
       }
-    };
-  </script>
+    });
 
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(out.value || "");
+        setJobStatus("Copied to clipboard.", 100);
+      } catch {
+        setJobStatus("Could not copy automatically. Copy manually.", 100, true);
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const text = out.value || "";
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transcript.txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setJobStatus("Downloaded transcript.txt", 100);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      out.value = "";
+      setJobStatus("Cleared.", 0);
+    });
+  </script>
 </body>
 </html>
